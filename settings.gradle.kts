@@ -21,3 +21,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "Dimension-35-c"
 include(":app")
+include(":network")

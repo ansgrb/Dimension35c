@@ -6,6 +6,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
@@ -18,10 +19,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import dev.ansgrb.dimension_35_c.ui.theme.Dimension35cTheme
-import dev.ansgrb.network.Character
+import dev.ansgrb.network.models.domain.Character
 import dev.ansgrb.network.KtorClient
+import dev.ansgrb.network.models.domain.CharacterStatus
+import kotlinx.coroutines.delay
 
 class MainActivity : ComponentActivity() {
 
@@ -34,8 +36,13 @@ class MainActivity : ComponentActivity() {
             var character by remember {
                 mutableStateOf<Character?>(null)
             }
+            var isLoaded by remember {
+                mutableStateOf(false)
+            }
             LaunchedEffect(key1 = Unit, block = {
+                delay(3000) // Simulate a network request delay
                 character = ktorClient.getCharacter(1)
+                isLoaded = true
             })
             Dimension35cTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
@@ -47,10 +54,24 @@ class MainActivity : ComponentActivity() {
                             .fillMaxSize()
                     ) {
                         Text(text = "This is")
-                        Text(text = character?.name ?: "Loading...")
+                        if(isLoaded){
+                            Text(text = character?.name ?: "Not Found")
+                            CharacterStatusComp(characterStatus = CharacterStatus.Alive)
+                        } else Text(text = "Loading...")
+
                     }
                 }
             }
         }
+    }
+}
+
+@Composable
+fun CharacterStatusComp(characterStatus: CharacterStatus) {
+    Row(
+        modifier = Modifier
+    ) {
+        Text(text = "Status: ")
+        Text(text = characterStatus.displayName)
     }
 }

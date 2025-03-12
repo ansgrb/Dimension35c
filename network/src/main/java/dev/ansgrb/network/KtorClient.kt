@@ -16,6 +16,9 @@
  */
 package dev.ansgrb.network
 
+import dev.ansgrb.network.models.domain.Character
+import dev.ansgrb.network.models.remote.RemoteCharacter
+import dev.ansgrb.network.models.remote.toDomainCharacter
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.engine.okhttp.OkHttp
@@ -26,7 +29,7 @@ import io.ktor.client.plugins.logging.Logging
 import io.ktor.client.plugins.logging.SIMPLE
 import io.ktor.client.request.get
 import io.ktor.serialization.kotlinx.json.json
-import kotlinx.serialization.Serializable
+//import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
 class KtorClient {
@@ -46,24 +49,26 @@ class KtorClient {
 
     // a suspendable function to get a character by id that returns a Character object
     suspend fun getCharacter(id: Int): Character {
-        return client.get("character/$id").body()
+        return client.get("character/$id")
+            .body<RemoteCharacter>()
+            .toDomainCharacter()
     }
 }
 
-@Serializable
-data class Character(
-    val id: Int,
-    val name: String,
-    val status: String,
-    val species: String,
-    val origin: Origin
-) {
-    @Serializable
-    data class Origin(
-        val name: String
-    )
-
-}
+//@Serializable
+//data class Character(
+//    val id: Int,
+//    val name: String,
+//    val status: String,
+//    val species: String,
+//    val origin: Origin
+//) {
+//    @Serializable
+//    data class Origin(
+//        val name: String
+//    )
+//
+//}
 
 /*
     that is based on a single character GET `https://rickandmortyapi.com/api/character/2`

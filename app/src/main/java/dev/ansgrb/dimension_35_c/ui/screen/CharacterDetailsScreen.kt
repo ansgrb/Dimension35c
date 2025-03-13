@@ -20,9 +20,11 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -30,6 +32,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import dev.ansgrb.dimension_35_c.ui.component.CharacterNamePlateComponent
+import dev.ansgrb.dimension_35_c.ui.component.LoadingSpinnerComponent
+import dev.ansgrb.dimension_35_c.ui.component.KeyFigure
+import dev.ansgrb.dimension_35_c.ui.component.KeyFigureComponent
 import dev.ansgrb.network.KtorClient
 import dev.ansgrb.network.models.domain.Character
 import kotlinx.coroutines.delay
@@ -41,6 +46,22 @@ fun CharacterDetailsScreen(
 ) {
     var character by remember { mutableStateOf<Character?>(null) }
 
+    val characterKeyFigures: List<KeyFigure> by remember {
+        derivedStateOf {
+            buildList {
+                character?.let { character ->
+                    add(KeyFigure("Last known location", character.location.name))
+                    add(KeyFigure("Species", character.species))
+                    add(KeyFigure("Gender", character.gender.displayName))
+                    character.type.takeIf { it.isNotEmpty() }?.let { type ->
+                        add(KeyFigure("type", type))
+                    }
+                    add(KeyFigure("Origin", character.origin.name))
+                    add(KeyFigure("Episode count", character.episodeIds.size.toString()))
+                }
+            }
+        }
+    }
 
     // network call
     LaunchedEffect(key1 = Unit, block = {
@@ -52,30 +73,22 @@ fun CharacterDetailsScreen(
         contentPadding = PaddingValues(all = 16.dp),
         modifier = Modifier.fillMaxSize()
     ) {
-
-        // Name
+        if (character == null) {
+            item { LoadingSpinnerComponent() }
+            return@LazyColumn
+        }
         item {
             CharacterNamePlateComponent(
-                name = character!!.name,
-                status = character!!.status
+                name = character?.name ?: "Null",
+                status = character?.status
             )
         }
-
         item { Spacer(modifier = Modifier.height(8.dp))}
-
-        // Image
-        item {
-            // TODO Image with coil
+        items(characterKeyFigures) {
+            KeyFigureComponent(keyFigure = it)
+            if (it != characterKeyFigures.last()) {
+                Spacer(modifier = Modifier.height(32.dp)) }
         }
-
-        item { Spacer(modifier = Modifier.height(32.dp))}
-
-        // Button
-        item {
-            // TODO a button
-        }
-
         item { Spacer(modifier = Modifier.height(64.dp))}
-
     }
 }

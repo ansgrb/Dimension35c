@@ -27,6 +27,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -34,36 +35,68 @@ import dev.ansgrb.dimension_35_c.ui.theme.Dimension35cTheme
 import dev.ansgrb.network.models.domain.CharacterStatus
 
 @Composable
-fun CharacterNamePlateComponent(name: String, status: CharacterStatus) {
+fun CharacterNamePlateComponent(name: String, status: CharacterStatus?) {
     Column(
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .border(
                     width = 1.dp,
-                    color = status.color,
+                    color = status?.color ?: Color.Cyan,
                     shape = RoundedCornerShape(12.dp)
                 )
                 .padding(horizontal = 12.dp, vertical = 4.dp)
 
         ) {
             Text(
-                text = "Status: ${status.displayName}",
+                text = "Status: ${status?.displayName}",
                 fontSize = 20.sp,
                 color = Color.Cyan
             )
         }
+        Text(
+            text = name,
+            fontSize = 42.sp,
+            lineHeight = 42.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color.Cyan
+        )
+    }
+}
+
+@Preview(
+    showBackground = true
+)
+@Composable
+fun CharacterNamePlateComponentPreviewAlive() {
+    Dimension35cTheme {
+        CharacterNamePlateComponent(
+            status = CharacterStatus.Alive,
+            name = "Rick Sanchez"
+        )
     }
 }
 
 @Preview
 @Composable
-fun CharacterNamePlateComponentPreview() {
+fun CharacterNamePlateComponentPreviewDead() {
     Dimension35cTheme {
         CharacterNamePlateComponent(
-            status = CharacterStatus.Alive,
+            status = CharacterStatus.Dead,
+            name = "Rick Sanchez"
+        )
+    }
+}
+
+@Preview
+@Composable
+fun CharacterNamePlateComponentPreviewUnknown() {
+    Dimension35cTheme {
+        CharacterNamePlateComponent(
+            status = CharacterStatus.Unknown,
             name = "Rick Sanchez"
         )
     }

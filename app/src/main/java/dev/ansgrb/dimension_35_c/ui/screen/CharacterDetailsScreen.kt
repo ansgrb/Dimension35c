@@ -17,6 +17,7 @@
 package dev.ansgrb.dimension_35_c.ui.screen
 
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
@@ -55,6 +56,7 @@ import kotlinx.coroutines.delay
 fun CharacterDetailsScreen(
     ktorClient: KtorClient,
     characterId: Int,
+    onNavigateToEpisodes: (Int) -> Unit,
 //    imageLoader: ImageLoader
 ) {
     var character by remember { mutableStateOf<Character?>(null) }
@@ -136,6 +138,9 @@ fun CharacterDetailsScreen(
                         shape = RoundedCornerShape(8.dp)
                     )
                     .clip(RoundedCornerShape(12.dp))
+                    .clickable {
+                        onNavigateToEpisodes(characterId)
+                    }
             )
         }
         item { Spacer(modifier = Modifier.height(64.dp))}

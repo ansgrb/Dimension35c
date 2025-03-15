@@ -79,7 +79,13 @@ fun CharacterDetailsScreen(
     // network call
     LaunchedEffect(key1 = Unit, block = {
         delay(500)
-        character = ktorClient.getCharacter(characterId)
+        ktorClient
+            .getCharacter(characterId)
+            .onMade {
+                character = it
+            }.onFailed { exception ->
+                // TODO handle error
+            }
     })
 
     LazyColumn(

@@ -47,9 +47,34 @@ class KtorClient {
     }
 
     // a suspendable function to get a character by id that returns a Character object
-    suspend fun getCharacter(id: Int): Character {
-        return client.get("character/$id")
-            .body<RemoteCharacter>()
-            .toDomainCharacter()
+    suspend fun getCharacter(id: Int): ApiOps<Character> {
+        return safeApiCall {
+            client.get("character/$id")
+                .body<RemoteCharacter>()
+                .toDomainCharacter()
+        }
+    }
+
+    private inline fun <T> safeApiCall(apiCall: () -> T): ApiOps<T> {
+        return try {
+            ApiOps.Made(data = apiCall())
+        } catch (e: Exception) {
+            ApiOps.Failed(exception = e)
+        }
+    }
+}
+
+// why the interface? to be able to return either a success or an error classes :)
+sealed interface ApiOps<T> {
+    data class Made<T>(val data: T) : ApiOps<T>
+    data class Failed<T>(val exception: Exception) : ApiOps<T>
+
+    fun onMade(block: (T) -> Unit): ApiOps<T> {
+        if (this is Made) block(data)
+        return this
+    }
+    fun onFailed(block: (Exception) -> Unit): ApiOps<T> {
+        if (this is Failed) block(exception)
+        return this
     }
 }

@@ -36,7 +36,7 @@ fun KeyFigureComponent(keyFigure: KeyFigure) {
         Text(
             text = keyFigure.description,
             fontSize = 18.sp,
-            color = Color.Cyan
+            color = Color.White
         )
     }
 }
@@ -44,7 +44,7 @@ fun KeyFigureComponent(keyFigure: KeyFigure) {
 data class KeyFigure( val title: String, val description: String )
 
 @Preview(
-    showBackground = true
+    showBackground = false
 )
 @Composable
 fun KeyFigureComponentPreview() {

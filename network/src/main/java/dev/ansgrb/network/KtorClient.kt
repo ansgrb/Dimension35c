@@ -46,12 +46,16 @@ class KtorClient {
         }
     }
 
+    private var characterCash = mutableMapOf<Int, Character>() // I'm using a map cuz i want to look up things really fucking quickly
+
     // a suspendable function to get a character by id that returns a Character object
     suspend fun getCharacter(id: Int): ApiOps<Character> {
+        characterCash[id]?.let { return ApiOps.Made(it) } // if we have a cash it will make  hit instantly
         return safeApiCall {
             client.get("character/$id")
                 .body<RemoteCharacter>()
                 .toDomainCharacter()
+                .also { characterCash[id] = it } // first use of also
         }
     }
 

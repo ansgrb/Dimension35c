@@ -80,7 +80,8 @@ fun CharacterDetailsScreen(
 
     // network call
     LaunchedEffect(key1 = Unit, block = {
-        delay(500)
+        // removing the delay cuz we have a cash layer already
+//        delay(500)
         ktorClient
             .getCharacter(characterId)
             .onMade {

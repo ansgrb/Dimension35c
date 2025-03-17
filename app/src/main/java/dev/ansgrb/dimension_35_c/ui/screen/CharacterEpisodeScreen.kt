@@ -29,6 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import dev.ansgrb.dimension_35_c.ui.component.CharacterNameComponent
+import dev.ansgrb.dimension_35_c.ui.component.ImageComponent
 import dev.ansgrb.dimension_35_c.ui.component.LoadingSpinnerComponent
 import dev.ansgrb.network.KtorClient
 import dev.ansgrb.network.models.domain.Character
@@ -58,6 +59,7 @@ private fun TheScreen(
 ) {
     LazyColumn {
         item { CharacterNameComponent(characterName = character.name) }
+        item { ImageComponent(imageUrl = character.imageUrl) }
     }
 
 }

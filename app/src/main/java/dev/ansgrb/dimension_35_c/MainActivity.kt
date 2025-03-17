@@ -15,6 +15,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import dev.ansgrb.dimension_35_c.ui.screen.CharacterDetailsScreen
+import dev.ansgrb.dimension_35_c.ui.screen.CharacterEpisodeScreen
 import dev.ansgrb.dimension_35_c.ui.theme.Dimension35cTheme
 import dev.ansgrb.network.KtorClient
 
@@ -49,7 +50,7 @@ class MainActivity : ComponentActivity() {
                             }
                         }
                         composable("characterEpisodes/{characterId}") { backStackEntry ->
-                            CharacterEpisodesScreen(
+                            CharacterEpisodeScreen(
                                 characterId = backStackEntry.arguments?.getString("characterId")!!.toInt()
                             )
                         }
@@ -57,21 +58,5 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
-    }
-}
-
-@Composable
-fun CharacterEpisodesScreen(
-    characterId: Int
-) {
-    Box(
-        contentAlignment = Alignment.Center,
-        modifier = Modifier
-            .fillMaxSize()
-    ) {
-        Text(
-            text = "Character Details Screen",
-            style = MaterialTheme.typography.titleLarge
-        )
     }
 }

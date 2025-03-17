@@ -51,7 +51,8 @@ class MainActivity : ComponentActivity() {
                         }
                         composable("characterEpisodes/{characterId}") { backStackEntry ->
                             CharacterEpisodeScreen(
-                                characterId = backStackEntry.arguments?.getString("characterId")!!.toInt()
+                                characterId = backStackEntry.arguments?.getString("characterId")!!.toInt(),
+                                ktorClient = ktorClient
                             )
                         }
                     }

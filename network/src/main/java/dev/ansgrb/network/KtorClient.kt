@@ -17,8 +17,11 @@
 package dev.ansgrb.network
 
 import dev.ansgrb.network.models.domain.Character
+import dev.ansgrb.network.models.domain.Episode
 import dev.ansgrb.network.models.remote.RemoteCharacter
+import dev.ansgrb.network.models.remote.RemoteEpisode
 import dev.ansgrb.network.models.remote.toDomainCharacter
+import dev.ansgrb.network.models.remote.toDomainEpisode
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.engine.okhttp.OkHttp
@@ -50,12 +53,21 @@ class KtorClient {
 
     // a suspendable function to get a character by id that returns a Character object
     suspend fun getCharacter(id: Int): ApiOps<Character> {
-        characterCash[id]?.let { return ApiOps.Made(it) } // if we have a cash it will make  hit instantly
+        characterCash[id]?.let { return ApiOps.Made(it) } // if we have a cash it will make a hit instantly
         return safeApiCall {
             client.get("character/$id")
                 .body<RemoteCharacter>()
                 .toDomainCharacter()
                 .also { characterCash[id] = it } // first use of also
+        }
+    }
+
+    suspend fun getEpisodes(episodeIds: List<Int>): ApiOps<List<Episode>> {
+        val idsCommaSeparated = episodeIds.joinToString(separator = ",")
+        return safeApiCall {
+            client.get("episode/$idsCommaSeparated")
+                .body<List<RemoteEpisode>>()
+                .map { it.toDomainEpisode() }
         }
     }
 

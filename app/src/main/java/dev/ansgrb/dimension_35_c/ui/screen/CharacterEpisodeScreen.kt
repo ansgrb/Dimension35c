@@ -16,9 +16,18 @@
  */
 package dev.ansgrb.dimension_35_c.ui.screen
 
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -26,13 +35,19 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.lazy.items
 import dev.ansgrb.dimension_35_c.ui.component.CharacterNameComponent
+import dev.ansgrb.dimension_35_c.ui.component.EpisodeRowComponent
 import dev.ansgrb.dimension_35_c.ui.component.ImageComponent
 import dev.ansgrb.dimension_35_c.ui.component.LoadingSpinnerComponent
 import dev.ansgrb.network.KtorClient
 import dev.ansgrb.network.models.domain.Character
+import dev.ansgrb.network.models.domain.Episode
+import kotlinx.coroutines.launch
 
 @Composable
 fun CharacterEpisodeScreen(
@@ -40,38 +55,80 @@ fun CharacterEpisodeScreen(
     ktorClient: KtorClient
 ) {
     var characterState by remember { mutableStateOf<Character?>(null) }
+    var episodesState by remember { mutableStateOf<List<Episode>>(emptyList()) }
 
     LaunchedEffect(key1 = Unit, block = {
         ktorClient.getCharacter(characterId).onMade { it ->
             characterState = it
+            launch {
+                ktorClient.getEpisodes(it.episodeIds).onMade { it ->
+                    episodesState = it
+                }.onFailed {
+                    // TODO: Will do it later
+                }
+            }
         }.onFailed {
             // TODO: Will do it later
         }
     } )
     characterState?.let { it ->
-        TheScreen(character = it)
+        TheScreen(character = it, episodes = episodesState)
     } ?: LoadingSpinnerComponent()
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun TheScreen(
-    character: Character
+    character: Character,
+    episodes: List<Episode>
 ) {
-    LazyColumn {
+    LazyColumn(
+        contentPadding = PaddingValues(all = 16.dp)
+    ) {
         item { CharacterNameComponent(characterName = character.name) }
+        item { Spacer(modifier = Modifier.height(16.dp)) }
         item { ImageComponent(imageUrl = character.imageUrl) }
+        item { Spacer(modifier = Modifier.height(32.dp)) }
+        items(episodes) { episode ->
+            EpisodeRowComponent(episode = episode)
+        }
+
+//        episodes.groupBy { it.seasonNumber }.forEach { mapEntry ->
+//            stickyHeader {
+//                TheScreenSeasonHeader(seasonNumber = mapEntry.key)
+//            }
+//            item { Spacer(modifier = Modifier.height(16.dp)) }
+//            items(mapEntry.value) { episode ->
+//                EpisodeRowComponent(episode = episode) }
+//        }
     }
 
 }
 
-@Preview(
-    showBackground = true,
-    showSystemUi = true
-)
 @Composable
-fun CharacterEpisodeScreenPreview() {
-    CharacterEpisodeScreen(
-        characterId = 1,
-        ktorClient = KtorClient()
-    )
+private fun TheScreenSeasonHeader(
+    seasonNumber: Int
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 8.dp, bottom = 16.dp)
+            .background(color = Color.Cyan)
+    ) {
+        Text(
+            text = "Season $seasonNumber",
+            color = Color.Cyan,
+            fontSize = 32.sp,
+            lineHeight = 32.sp,
+            textAlign = TextAlign.Center,
+            modifier = Modifier
+                .fillMaxWidth()
+                .border(
+                    width = 1.dp,
+                    color = Color.Cyan,
+                    shape = RoundedCornerShape(8.dp)
+                )
+                .padding(vertical = 4.dp)
+        )
+    }
 }

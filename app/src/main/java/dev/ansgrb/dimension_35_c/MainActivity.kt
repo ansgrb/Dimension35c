@@ -44,10 +44,11 @@ class MainActivity : ComponentActivity() {
                             CharacterDetailsScreen(
                                 ktorClient = ktorClient,
                                 characterId = 1,
-//                                imageLoader = imageLoader
-                            ) {
-                                navController.navigate("characterEpisodes/$it")
-                            }
+//                                imageLoader = imageLoader,
+                                onNavigateToEpisodes = {
+                                    navController.navigate("characterEpisodes/$it")
+                                }
+                            )
                         }
                         composable("characterEpisodes/{characterId}") { backStackEntry ->
                             CharacterEpisodeScreen(

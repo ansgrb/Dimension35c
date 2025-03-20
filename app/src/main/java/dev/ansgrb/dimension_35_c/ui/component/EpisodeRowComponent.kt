@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -66,9 +67,14 @@ fun EpisodeRowComponent(
             )
         }
     }
+    Spacer(modifier = Modifier.height(16.dp))
 }
 
-@Preview
+@Preview(
+    showBackground = true,
+    backgroundColor = 0xFF1A1A1A,
+    showSystemUi = true
+)
 @Composable
 private fun EpisodeRowComponentPreview() {
     val episode = Episode(
@@ -81,6 +87,10 @@ private fun EpisodeRowComponentPreview() {
             1, 2, 3, 55, 13
         )
     )
-    EpisodeRowComponent(episode = episode)
+    Column {
+        for (i in 1..5) {
+            EpisodeRowComponent(episode = episode)
+        }
+    }
 }
 

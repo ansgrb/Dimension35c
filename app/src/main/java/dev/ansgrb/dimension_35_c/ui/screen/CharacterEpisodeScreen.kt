@@ -40,6 +40,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.MaterialTheme
 import dev.ansgrb.dimension_35_c.ui.component.CharacterNameComponent
 import dev.ansgrb.dimension_35_c.ui.component.EpisodeRowComponent
 import dev.ansgrb.dimension_35_c.ui.component.ImageComponent
@@ -92,18 +93,18 @@ private fun TheScreen(
         item { Spacer(modifier = Modifier.height(16.dp)) }
         item { ImageComponent(imageUrl = character.imageUrl) }
         item { Spacer(modifier = Modifier.height(32.dp)) }
-        items(episodes) { episode ->
-            EpisodeRowComponent(episode = episode)
-        }
-
-//        episodes.groupBy { it.seasonNumber }.forEach { mapEntry ->
-//            stickyHeader {
-//                TheScreenSeasonHeader(seasonNumber = mapEntry.key)
-//            }
-//            item { Spacer(modifier = Modifier.height(16.dp)) }
-//            items(mapEntry.value) { episode ->
-//                EpisodeRowComponent(episode = episode) }
+//        items(episodes) { episode ->
+//            EpisodeRowComponent(episode = episode)
 //        }
+
+        episodes.groupBy { it.seasonNumber }.forEach { mapEntry ->
+            stickyHeader {
+                TheScreenSeasonHeader(seasonNumber = mapEntry.key)
+            }
+            item { Spacer(modifier = Modifier.height(16.dp)) }
+            items(mapEntry.value) { episode ->
+                EpisodeRowComponent(episode = episode) }
+        }
     }
 
 }
@@ -116,11 +117,11 @@ private fun TheScreenSeasonHeader(
         modifier = Modifier
             .fillMaxWidth()
             .padding(top = 8.dp, bottom = 16.dp)
-            .background(color = Color.Cyan)
+            .background(color = MaterialTheme.colorScheme.surface)
     ) {
         Text(
             text = "Season $seasonNumber",
-            color = Color.Cyan,
+            color = Color.White,
             fontSize = 32.sp,
             lineHeight = 32.sp,
             textAlign = TextAlign.Center,
@@ -128,7 +129,7 @@ private fun TheScreenSeasonHeader(
                 .fillMaxWidth()
                 .border(
                     width = 1.dp,
-                    color = Color.Cyan,
+                    color = Color.White,
                     shape = RoundedCornerShape(8.dp)
                 )
                 .padding(vertical = 4.dp)

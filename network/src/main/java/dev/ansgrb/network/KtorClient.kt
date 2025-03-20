@@ -33,6 +33,7 @@ import io.ktor.client.plugins.logging.SIMPLE
 import io.ktor.client.request.get
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
+import kotlin.text.get
 
 class KtorClient {
     private val client = HttpClient(OkHttp) {
@@ -65,9 +66,17 @@ class KtorClient {
     suspend fun getEpisodes(episodeIds: List<Int>): ApiOps<List<Episode>> {
         val idsCommaSeparated = episodeIds.joinToString(separator = ",")
         return safeApiCall {
-            client.get("episode/$idsCommaSeparated")
-                .body<List<RemoteEpisode>>()
-                .map { it.toDomainEpisode() }
+            //  to handle both single episode and multiple episodes cases
+            val response = if (episodeIds.size == 1) {
+                listOf(client.get("episode/$idsCommaSeparated").body<RemoteEpisode>()) // if we have a single episode we will wrap it in a list
+            } else {
+                client.get("episode/$idsCommaSeparated").body<List<RemoteEpisode>>() // if we have multiple episodes we will get a list
+            }
+            response.map { it.toDomainEpisode() }
+
+//            client.get("episode/$idsCommaSeparated")
+//                .body<List<RemoteEpisode>>()
+//                .map { it.toDomainEpisode() }
         }
     }
 

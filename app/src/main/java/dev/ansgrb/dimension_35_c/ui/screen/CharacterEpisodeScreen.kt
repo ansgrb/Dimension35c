@@ -62,12 +62,15 @@ fun CharacterEpisodeScreen(
             characterState = it
             launch {
                 ktorClient.getEpisodes(it.episodeIds).onMade { it ->
+                    println("Episodes loaded: ${it.size}")
                     episodesState = it
-                }.onFailed {
+                }.onFailed { error ->
+                    println("Error loading episodes: $error")
                     // TODO: Will do it later
                 }
             }
-        }.onFailed {
+        }.onFailed { error ->
+            println("Error loading character: $error")
             // TODO: Will do it later
         }
     } )

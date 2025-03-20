@@ -18,12 +18,14 @@ package dev.ansgrb.network.models.remote
 
 import dev.ansgrb.network.models.domain.Episode
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerialName
 
 @Serializable
 data class RemoteEpisode(
     val id: Int,
     val name: String,
     val episode: String,
+    @SerialName("air_date")
     val airDate: String,
     val characters: List<String>
 )

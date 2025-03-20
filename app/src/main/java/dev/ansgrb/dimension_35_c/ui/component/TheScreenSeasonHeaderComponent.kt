@@ -16,43 +16,47 @@
  */
 package dev.ansgrb.dimension_35_c.ui.component
 
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
+
 @Composable
-fun KeyFigureComponent(keyFigure: KeyFigure) {
-    Column(
-        modifier = Modifier.padding(horizontal = 4.dp)
+fun TheScreenSeasonHeaderComponent(
+    seasonNumber: Int
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 8.dp, bottom = 16.dp)
+            .background(color = MaterialTheme.colorScheme.surface)
     ) {
         Text(
-            text = keyFigure.title,
-            fontSize = 12.sp,
-            fontWeight = FontWeight.Bold,
-            color = Color.Cyan
-        )
-        Text(
-            text = keyFigure.description,
-            fontSize = 18.sp,
-            color = Color.White
+            text = "Season $seasonNumber",
+            color = Color.White,
+            fontSize = 32.sp,
+            lineHeight = 32.sp,
+            textAlign = TextAlign.Center,
+            modifier = Modifier
+                .fillMaxWidth()
+                .border(
+                    width = 1.dp,
+                    color = Color.White,
+                    shape = RoundedCornerShape(8.dp)
+                )
+                .padding(vertical = 4.dp)
         )
     }
 }
 
-data class KeyFigure( val title: String, val description: String )
-
-@Preview(
-    showBackground = false
-)
-@Composable
-fun KeyFigureComponentPreview() {
-    val key = KeyFigure(title = "Last known location", description = "Citadel of Ricks")
-    KeyFigureComponent(keyFigure = key)
-}

@@ -43,7 +43,7 @@ class MainActivity : ComponentActivity() {
                         composable("characterDetails") {
                             CharacterDetailsScreen(
                                 ktorClient = ktorClient,
-                                characterId = 1,
+                                characterId = 13,
 //                                imageLoader = imageLoader,
                                 onNavigateToEpisodes = {
                                     navController.navigate("characterEpisodes/$it")

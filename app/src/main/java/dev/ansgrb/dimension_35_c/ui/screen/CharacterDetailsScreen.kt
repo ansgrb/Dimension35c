@@ -52,11 +52,13 @@ import androidx.lifecycle.viewModelScope
 import coil3.ImageLoader
 import coil3.compose.SubcomposeAsyncImage
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dev.ansgrb.dimension_35_c.data.repository.CharacterRepository
 import dev.ansgrb.dimension_35_c.ui.component.CharacterNamePlateComponent
 import dev.ansgrb.dimension_35_c.ui.component.ImageComponent
 import dev.ansgrb.dimension_35_c.ui.component.LoadingSpinnerComponent
 import dev.ansgrb.dimension_35_c.ui.component.KeyFigure
 import dev.ansgrb.dimension_35_c.ui.component.KeyFigureComponent
+import dev.ansgrb.dimension_35_c.viewmodel.CharacterDetailsViewModel
 import dev.ansgrb.network.ApiOps
 import dev.ansgrb.network.KtorClient
 import dev.ansgrb.network.models.domain.Character
@@ -68,49 +70,6 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlin.text.isNotEmpty
 
-class CharacterRepository @Inject constructor(private val ktorClient: KtorClient) {
-    suspend fun fetchCharacter(characterId: Int): ApiOps<Character> {
-        return ktorClient.getCharacter(characterId)
-    }
-}
-
-@HiltViewModel
-class CharacterDetailsViewModel @Inject constructor(
-    private val characterRepository: CharacterRepository
-): ViewModel() {
-    private val _internalStorageFlow = MutableStateFlow<CharacterDetailsViewState>(
-        value = CharacterDetailsViewState.Loading
-    )
-    val stateFlow = _internalStorageFlow.asStateFlow()
-
-    fun fetchCharacter(characterId: Int) = viewModelScope.launch {
-        _internalStorageFlow.update { return@update CharacterDetailsViewState.Loading }
-        characterRepository.fetchCharacter(characterId).onMade { character ->
-            val keyFigures = buildList {
-                add(KeyFigure("Last known location", character.location.name))
-                add(KeyFigure("Species", character.species))
-                add(KeyFigure("Gender", character.gender.displayName))
-                character.type.takeIf { it.isNotEmpty() }?.let { type ->
-                    add(KeyFigure("type", type))
-                }
-                add(KeyFigure("Origin", character.origin.name))
-                add(KeyFigure("Episode count", character.episodeIds.size.toString()))
-            }
-            _internalStorageFlow.update {
-                return@update CharacterDetailsViewState.Loaded(
-                    character = character,
-                    characterKeyFigures = keyFigures
-                )
-            }
-        }.onFailed { exception ->
-            _internalStorageFlow.update {
-                return@update CharacterDetailsViewState.Error(
-                    message = exception.message ?: "Unknown error"
-                )
-            }
-        }
-    }
-}
 sealed interface CharacterDetailsViewState {
     object Loading : CharacterDetailsViewState
     data class Loaded(
@@ -174,7 +133,6 @@ fun CharacterDetailsScreen(
                 }
                 item { Spacer(modifier = Modifier.height(64.dp)) }
             }
-
             CharacterDetailsViewState.Loading -> {
                 item { LoadingSpinnerComponent() }
             }

@@ -19,6 +19,7 @@ import dev.ansgrb.dimension_35_c.ui.screen.CharacterDetailsScreen
 import dev.ansgrb.dimension_35_c.ui.screen.CharacterEpisodeScreen
 import dev.ansgrb.dimension_35_c.ui.theme.Dimension35cTheme
 import dev.ansgrb.network.KtorClient
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -27,7 +28,8 @@ class MainActivity : ComponentActivity() {
 //        .logger(DebugLogger())
 //        .build()
 
-    private val ktorClient = KtorClient()
+    @Inject
+    lateinit var ktorClient: KtorClient
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,9 +45,7 @@ class MainActivity : ComponentActivity() {
                     NavHost(navController = navController, startDestination = "characterDetails") {
                         composable("characterDetails") {
                             CharacterDetailsScreen(
-                                ktorClient = ktorClient,
                                 characterId = 13,
-//                                imageLoader = imageLoader,
                                 onNavigateToEpisodes = {
                                     navController.navigate("characterEpisodes/$it")
                                 }

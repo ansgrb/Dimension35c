@@ -14,12 +14,13 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import dagger.hilt.android.AndroidEntryPoint
 import dev.ansgrb.dimension_35_c.ui.screen.CharacterDetailsScreen
 import dev.ansgrb.dimension_35_c.ui.screen.CharacterEpisodeScreen
 import dev.ansgrb.dimension_35_c.ui.theme.Dimension35cTheme
 import dev.ansgrb.network.KtorClient
 
-
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
 //    private val imageLoader = ImageLoader.Builder(this)

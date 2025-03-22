@@ -17,21 +17,28 @@
 package dev.ansgrb.dimension_35_c.ui.screen
 
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.ansgrb.dimension_35_c.data.repository.CharacterRepository
 import dev.ansgrb.dimension_35_c.ui.component.CharacterGridItemComponent
 import dev.ansgrb.dimension_35_c.ui.component.LoadingSpinnerComponent
+import dev.ansgrb.dimension_35_c.viewmodel.MainViewModel
 import dev.ansgrb.network.models.domain.Character
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -43,37 +50,12 @@ import javax.inject.Inject
 
 sealed interface MainViewState {
     object Loading : MainViewState
-    data class GridLoaded(val characters: List<Character> = emptyList()) : MainViewState
-}
-
-@HiltViewModel
-class MainViewModel @Inject constructor(
-    private val characterRepository: CharacterRepository
-) : ViewModel() {
-    private val _viewState = MutableStateFlow<MainViewState>(MainViewState.Loading)
-    val viewState: StateFlow<MainViewState> = _viewState.asStateFlow()
-
-    fun fetchCharacters() = viewModelScope.launch {
-        val initialFetch = characterRepository.fetchCharacters(page = 1)
-        initialFetch.onMade { page ->
-            _viewState.update {
-                return@update MainViewState.GridLoaded(characters = page.results)
-            }
-        }.onFailed {
-            // TODO: Handle error
-        }
-    }
-//    fun fetchNextPage() = viewModelScope.launch {
-//        val currentState = viewState.value
-//        if (currentState !is MainViewState.GridLoaded) return@launch
-//        val nextPage = characterRepository.fetchCharacters(page = 2)
-//        nextPage.onMade { page ->
-//            _viewState.update {
-//                return@onMade MainViewState.GridLoaded(characters = currentState.characters + page.results)
-//            }
-//        }.onFailed {}
-//    }
-
+    data class GridLoaded(
+        val characters: List<Character> = emptyList(),
+        val isLoadingMore: Boolean = false,
+        val currentPage: Int = 1,
+        val hasMorePages: Boolean = true
+    ) : MainViewState
 }
 
 @Composable
@@ -91,6 +73,9 @@ fun MainScreen(
         is MainViewState.GridLoaded -> {
             LazyVerticalGrid(
                 columns = GridCells.Fixed(2),
+                contentPadding = PaddingValues(all = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
                 modifier = Modifier,
                 content = {
                     items(
@@ -102,6 +87,18 @@ fun MainScreen(
                             modifier = Modifier,
                             onClick = { onCharacterClicked(character.id) }
                         )
+                    }
+                    if (state.isLoadingMore) {
+                        item(span = { GridItemSpan(2) }) {
+                            LoadingSpinnerComponent()
+                        }
+                    }
+                    if (!state.isLoadingMore && state.hasMorePages) {
+                        item(span = { GridItemSpan(2) }) {
+                            LaunchedEffect(Unit) {
+                                viewModel.loadNextPage()
+                            }
+                        }
                     }
                 }
             )

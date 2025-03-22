@@ -46,12 +46,14 @@ class MainActivity : ComponentActivity() {
                     NavHost(navController = navController, startDestination = "mainScreen") {
                         composable("mainScreen") {
                             MainScreen(
-                                onCharacterClicked = { TODO() },
+                                onCharacterClicked = { characterId ->
+                                    navController.navigate("characterDetails/$characterId")
+                                },
                             )
                         }
-                        composable("characterDetails") {
+                        composable("characterDetails/{characterId}") { backStackEntry ->
                             CharacterDetailsScreen(
-                                characterId = 2,
+                                characterId = backStackEntry.arguments?.getString("characterId")!!.toInt(),
                                 onNavigateToEpisodes = {
                                     navController.navigate("characterEpisodes/$it")
                                 }

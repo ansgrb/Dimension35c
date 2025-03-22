@@ -43,7 +43,7 @@ fun CharacterGridItemComponent(
         modifier = modifier
             .border(
                 width = 1.dp,
-                brush = Brush.verticalGradient(listOf(Color.Gray, Color.Black)),
+                brush = Brush.verticalGradient(listOf(Color.White, Color.Transparent)),
                 shape = RoundedCornerShape(12.dp)
             )
             .clip(RoundedCornerShape(12.dp))

@@ -51,7 +51,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import coil3.ImageLoader
 import coil3.compose.SubcomposeAsyncImage
-import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.ansgrb.dimension_35_c.data.repository.CharacterRepository
 import dev.ansgrb.dimension_35_c.ui.component.CharacterNamePlateComponent
 import dev.ansgrb.dimension_35_c.ui.component.ImageComponent

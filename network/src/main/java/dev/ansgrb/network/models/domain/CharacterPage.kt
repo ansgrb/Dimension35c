@@ -14,21 +14,17 @@
  * whether in an action of contract, tort, or otherwise, arising from,
  * out of, or in connection with the Software or the use of it.
  */
-package dev.ansgrb.dimension_35_c.data.repository
+package dev.ansgrb.network.models.domain
 
-import dev.ansgrb.network.ApiOps
-import dev.ansgrb.network.KtorClient
-import dev.ansgrb.network.models.domain.Character
-import dev.ansgrb.network.models.domain.CharacterPage
-import javax.inject.Inject
 
-class CharacterRepository @Inject constructor(private val ktorClient: KtorClient) {
-    suspend fun fetchCharacters(page: Int): ApiOps<CharacterPage> {
-        return ktorClient.getCharacterByPage(pageNo = page)
-    }
-
-    suspend fun fetchCharacter(characterId: Int): ApiOps<Character> {
-        return ktorClient.getCharacter(characterId)
-    }
+data class CharacterPage (
+    val info: Info,
+    val results: List<Character>
+) {
+    data class Info(
+        val count: Int,
+        val pages: Int,
+        val next: String?,
+        val prev: String?
+    )
 }
-

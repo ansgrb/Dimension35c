@@ -17,6 +17,7 @@ import androidx.navigation.compose.rememberNavController
 import dagger.hilt.android.AndroidEntryPoint
 import dev.ansgrb.dimension_35_c.ui.screen.CharacterDetailsScreen
 import dev.ansgrb.dimension_35_c.ui.screen.CharacterEpisodeScreen
+import dev.ansgrb.dimension_35_c.ui.screen.MainScreen
 import dev.ansgrb.dimension_35_c.ui.theme.Dimension35cTheme
 import dev.ansgrb.network.KtorClient
 import javax.inject.Inject
@@ -42,10 +43,15 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier
                         .fillMaxSize()
                 ) {
-                    NavHost(navController = navController, startDestination = "characterDetails") {
+                    NavHost(navController = navController, startDestination = "mainScreen") {
+                        composable("mainScreen") {
+                            MainScreen(
+                                onCharacterClicked = { TODO() },
+                            )
+                        }
                         composable("characterDetails") {
                             CharacterDetailsScreen(
-                                characterId = 13,
+                                characterId = 2,
                                 onNavigateToEpisodes = {
                                     navController.navigate("characterEpisodes/$it")
                                 }

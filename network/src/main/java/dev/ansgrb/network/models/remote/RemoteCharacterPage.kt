@@ -14,21 +14,34 @@
  * whether in an action of contract, tort, or otherwise, arising from,
  * out of, or in connection with the Software or the use of it.
  */
-package dev.ansgrb.dimension_35_c.data.repository
+package dev.ansgrb.network.models.remote
 
-import dev.ansgrb.network.ApiOps
-import dev.ansgrb.network.KtorClient
-import dev.ansgrb.network.models.domain.Character
 import dev.ansgrb.network.models.domain.CharacterPage
-import javax.inject.Inject
+import kotlinx.serialization.Serializable
 
-class CharacterRepository @Inject constructor(private val ktorClient: KtorClient) {
-    suspend fun fetchCharacters(page: Int): ApiOps<CharacterPage> {
-        return ktorClient.getCharacterByPage(pageNo = page)
-    }
 
-    suspend fun fetchCharacter(characterId: Int): ApiOps<Character> {
-        return ktorClient.getCharacter(characterId)
-    }
+@Serializable
+data class RemoteCharacterPage(
+    val info: Info,
+    val results: List<RemoteCharacter>
+) {
+    @Serializable
+    data class Info(
+        val count: Int,
+        val pages: Int,
+        val next: String?,
+        val prev: String?
+    )
 }
 
+fun RemoteCharacterPage.toDomainCharacterPage(): CharacterPage {
+    return CharacterPage(
+        info = CharacterPage.Info(
+            count = info.count,
+            pages = info.pages,
+            next = info.next,
+            prev = info.prev
+        ),
+        results = results.map { it.toDomainCharacter() }
+    )
+}

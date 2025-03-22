@@ -17,10 +17,13 @@
 package dev.ansgrb.network
 
 import dev.ansgrb.network.models.domain.Character
+import dev.ansgrb.network.models.domain.CharacterPage
 import dev.ansgrb.network.models.domain.Episode
 import dev.ansgrb.network.models.remote.RemoteCharacter
+import dev.ansgrb.network.models.remote.RemoteCharacterPage
 import dev.ansgrb.network.models.remote.RemoteEpisode
 import dev.ansgrb.network.models.remote.toDomainCharacter
+import dev.ansgrb.network.models.remote.toDomainCharacterPage
 import dev.ansgrb.network.models.remote.toDomainEpisode
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -33,7 +36,6 @@ import io.ktor.client.plugins.logging.SIMPLE
 import io.ktor.client.request.get
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
-import kotlin.text.get
 
 class KtorClient {
     private val client = HttpClient(OkHttp) {
@@ -60,6 +62,14 @@ class KtorClient {
                 .body<RemoteCharacter>()
                 .toDomainCharacter()
                 .also { characterCash[id] = it } // first use of also
+        }
+    }
+
+    suspend fun getCharacterByPage(pageNo: Int): ApiOps<CharacterPage> {
+        return safeApiCall {
+            client.get("character/?page=$pageNo")
+                .body<RemoteCharacterPage>()
+                .toDomainCharacterPage()
         }
     }
 

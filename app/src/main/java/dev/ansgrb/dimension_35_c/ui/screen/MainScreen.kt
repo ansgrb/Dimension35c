@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
@@ -31,6 +32,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewModelScope
@@ -64,7 +66,15 @@ fun MainScreen(
     viewModel: MainViewModel = hiltViewModel()
 ) {
     val viewState by viewModel.viewState.collectAsState()
-    LaunchedEffect(key1 = viewModel, block = { viewModel.fetchCharacters() })
+
+    val gridState = rememberLazyGridState()
+
+    // Only fetch if we're in Loading state and have no characters
+    LaunchedEffect(Unit) {
+        if (viewState is MainViewState.Loading) {
+            viewModel.fetchCharacters()
+        }
+    }
 
     when (val state = viewState) {
         is MainViewState.Loading -> {
@@ -72,6 +82,7 @@ fun MainScreen(
         }
         is MainViewState.GridLoaded -> {
             LazyVerticalGrid(
+                state = gridState,
                 columns = GridCells.Fixed(2),
                 contentPadding = PaddingValues(all = 16.dp),
                 horizontalArrangement = Arrangement.spacedBy(16.dp),

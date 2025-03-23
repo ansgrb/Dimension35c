@@ -54,9 +54,10 @@ fun Dimension35cToolbarComponent(
     actions: @Composable RowScope.() -> Unit = {},
     colors: TopAppBarColors = TopAppBarDefaults.topAppBarColors(
         containerColor = MaterialTheme.colorScheme.primary,
-        titleContentColor = MaterialTheme.colorScheme.onPrimary
+        titleContentColor = MaterialTheme.colorScheme.onPrimary,
+        scrolledContainerColor = MaterialTheme.colorScheme.primary
     ),
-//    scrollBehavior: TopAppBarScrollBehavior? = null
+    scrollBehavior: TopAppBarScrollBehavior? = TopAppBarDefaults.enterAlwaysScrollBehavior()
 ) {
     if (showBackButton && onBackButtonClicked == {}) {
         throw IllegalArgumentException("onBackButtonClicked must be provided when showBackButton is true")
@@ -82,7 +83,7 @@ fun Dimension35cToolbarComponent(
         } } else { {} },
         actions = actions,
         colors = colors,
-//        scrollBehavior = scrollBehavior,
+        scrollBehavior = scrollBehavior,
         modifier = modifier
     )
 }

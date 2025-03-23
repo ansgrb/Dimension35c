@@ -45,6 +45,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import dev.ansgrb.dimension_35_c.ui.component.CharacterNameComponent
 import dev.ansgrb.dimension_35_c.ui.component.Dimension35cToolbarComponent
 import dev.ansgrb.dimension_35_c.ui.component.EpisodeRowComponent
@@ -96,14 +98,17 @@ private fun TheScreen(
     episodes: List<Episode>,
     onBackButtonClicked: () -> Unit = {}
 ) {
+    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     Scaffold(
         topBar = {
             Dimension35cToolbarComponent(
                 title = "Episodes",
                 showBackButton = true,
-                onBackButtonClicked = onBackButtonClicked
+                onBackButtonClicked = onBackButtonClicked,
+                scrollBehavior = scrollBehavior
             )
-        }
+        },
+        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection)
     ) { paddingValues ->
         val groupedEpisodes = episodes.groupBy { it.seasonNumber }
         LazyColumn(
@@ -120,7 +125,7 @@ private fun TheScreen(
                 LazyRow {
                     groupedEpisodes.forEach { mapEntry ->
                         val title = "Season ${mapEntry.key}"
-                        val description = "${mapEntry.value.size.toString()} ep"
+                        val description = "${mapEntry.value.size} ep"
                         item {
                             KeyFigureComponent(keyFigure = KeyFigure(title = title, description = description))
                             Spacer(modifier = Modifier.width(16.dp))

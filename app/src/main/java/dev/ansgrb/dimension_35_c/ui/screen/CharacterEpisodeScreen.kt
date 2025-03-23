@@ -42,8 +42,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import dev.ansgrb.dimension_35_c.ui.component.CharacterNameComponent
+import dev.ansgrb.dimension_35_c.ui.component.Dimension35cToolbarComponent
 import dev.ansgrb.dimension_35_c.ui.component.EpisodeRowComponent
 import dev.ansgrb.dimension_35_c.ui.component.ImageComponent
 import dev.ansgrb.dimension_35_c.ui.component.KeyFigure
@@ -58,7 +61,8 @@ import kotlinx.coroutines.launch
 @Composable
 fun CharacterEpisodeScreen(
     characterId: Int,
-    ktorClient: KtorClient
+    ktorClient: KtorClient,
+    onBackButtonClicked: () -> Unit
 ) {
     var characterState by remember { mutableStateOf<Character?>(null) }
     var episodesState by remember { mutableStateOf<List<Episode>>(emptyList()) }
@@ -81,50 +85,64 @@ fun CharacterEpisodeScreen(
         }
     } )
     characterState?.let { it ->
-        TheScreen(character = it, episodes = episodesState)
+        TheScreen(character = it, episodes = episodesState, onBackButtonClicked = onBackButtonClicked)
     } ?: LoadingSpinnerComponent()
 }
 
-@OptIn(ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 private fun TheScreen(
     character: Character,
-    episodes: List<Episode>
+    episodes: List<Episode>,
+    onBackButtonClicked: () -> Unit = {}
 ) {
-    val groupedEpisodes = episodes.groupBy { it.seasonNumber }
-    LazyColumn(
-        contentPadding = PaddingValues(all = 16.dp)
-    ) {
-        item { CharacterNameComponent(characterName = character.name) }
-        item { Spacer(modifier = Modifier.height(8.dp)) }
-        item {
-            LazyRow {
-                groupedEpisodes.forEach { mapEntry ->
-                    val title = "Season ${mapEntry.key}"
-                    val description = "${mapEntry.value.size.toString()} ep"
-                    item {
-                        KeyFigureComponent(keyFigure = KeyFigure(title = title, description = description))
-                        Spacer(modifier = Modifier.width(16.dp))
+    Scaffold(
+        topBar = {
+            Dimension35cToolbarComponent(
+                title = "Episodes",
+                showBackButton = true,
+                onBackButtonClicked = onBackButtonClicked
+            )
+        }
+    ) { paddingValues ->
+        val groupedEpisodes = episodes.groupBy { it.seasonNumber }
+        LazyColumn(
+            contentPadding = PaddingValues(
+                top = paddingValues.calculateTopPadding() + 16.dp,
+                start = 16.dp,
+                end = 16.dp,
+                bottom = 16.dp
+            )
+        ) {
+            item { CharacterNameComponent(characterName = character.name) }
+            item { Spacer(modifier = Modifier.height(8.dp)) }
+            item {
+                LazyRow {
+                    groupedEpisodes.forEach { mapEntry ->
+                        val title = "Season ${mapEntry.key}"
+                        val description = "${mapEntry.value.size.toString()} ep"
+                        item {
+                            KeyFigureComponent(keyFigure = KeyFigure(title = title, description = description))
+                            Spacer(modifier = Modifier.width(16.dp))
+                        }
                     }
                 }
             }
-        }
-        item { Spacer(modifier = Modifier.height(16.dp)) }
-        item { ImageComponent(imageUrl = character.imageUrl) }
-        item { Spacer(modifier = Modifier.height(32.dp)) }
+            item { Spacer(modifier = Modifier.height(16.dp)) }
+            item { ImageComponent(imageUrl = character.imageUrl) }
+            item { Spacer(modifier = Modifier.height(32.dp)) }
 //        items(episodes) { episode ->
 //            EpisodeRowComponent(episode = episode)
 //        }
-
-        groupedEpisodes.forEach { mapEntry ->
-            stickyHeader {
-                TheScreenSeasonHeaderComponent(seasonNumber = mapEntry.key)
+            groupedEpisodes.forEach { mapEntry ->
+                stickyHeader {
+                    TheScreenSeasonHeaderComponent(seasonNumber = mapEntry.key)
+                }
+                item { Spacer(modifier = Modifier.height(16.dp)) }
+                items(mapEntry.value) { episode ->
+                    EpisodeRowComponent(episode = episode) }
             }
-            item { Spacer(modifier = Modifier.height(16.dp)) }
-            items(mapEntry.value) { episode ->
-                EpisodeRowComponent(episode = episode) }
         }
     }
-
 }
 

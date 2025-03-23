@@ -30,6 +30,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -53,6 +55,7 @@ import coil3.ImageLoader
 import coil3.compose.SubcomposeAsyncImage
 import dev.ansgrb.dimension_35_c.data.repository.CharacterRepository
 import dev.ansgrb.dimension_35_c.ui.component.CharacterNamePlateComponent
+import dev.ansgrb.dimension_35_c.ui.component.Dimension35cToolbarComponent
 import dev.ansgrb.dimension_35_c.ui.component.ImageComponent
 import dev.ansgrb.dimension_35_c.ui.component.LoadingSpinnerComponent
 import dev.ansgrb.dimension_35_c.ui.component.KeyFigure
@@ -78,62 +81,79 @@ sealed interface CharacterDetailsViewState {
     data class Error(val message: String) : CharacterDetailsViewState
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CharacterDetailsScreen(
     characterId: Int,
     viewModel: CharacterDetailsViewModel = hiltViewModel(),
     onNavigateToEpisodes: (Int) -> Unit,
+    onBackButtonClicked: () -> Unit
     ) {
-    LaunchedEffect(key1 = Unit, block = {
-        viewModel.fetchCharacter(characterId)
-    })
-    val state by viewModel.stateFlow.collectAsState()
-    LazyColumn(
-        contentPadding = PaddingValues(all = 16.dp),
-        modifier = Modifier.fillMaxSize()
-    ) {
-        when (val viewState = state) {
-            is CharacterDetailsViewState.Error -> TODO()
-            is CharacterDetailsViewState.Loaded -> {
-                val character = viewState.character
-                item {
-                    CharacterNamePlateComponent(
-                        name = character.name,
-                        status = character.status
-                    )
-                }
-                item { Spacer(modifier = Modifier.height(8.dp)) }
-                item { ImageComponent(imageUrl = character.imageUrl) }
-                items(viewState.characterKeyFigures) {
-                    KeyFigureComponent(keyFigure = it)
-                    if (it != viewState.characterKeyFigures.last()) {
-                        Spacer(modifier = Modifier.height(32.dp))
+    Scaffold(
+        topBar = {
+            Dimension35cToolbarComponent(
+                title = "Character Details",
+                showBackButton = true,
+                onBackButtonClicked = onBackButtonClicked
+            )
+        }
+    ) { paddingValues ->
+        LaunchedEffect(key1 = Unit, block = {
+            viewModel.fetchCharacter(characterId)
+        })
+        val state by viewModel.stateFlow.collectAsState()
+        LazyColumn(
+            contentPadding = PaddingValues(
+                top = paddingValues.calculateTopPadding() + 16.dp,
+                start = 16.dp,
+                end = 16.dp,
+                bottom = 16.dp
+            ),
+            modifier = Modifier.fillMaxSize()
+        ) {
+            when (val viewState = state) {
+                is CharacterDetailsViewState.Error -> TODO()
+                is CharacterDetailsViewState.Loaded -> {
+                    val character = viewState.character
+                    item {
+                        CharacterNamePlateComponent(
+                            name = character.name,
+                            status = character.status
+                        )
                     }
+                    item { Spacer(modifier = Modifier.height(8.dp)) }
+                    item { ImageComponent(imageUrl = character.imageUrl) }
+                    items(viewState.characterKeyFigures) {
+                        KeyFigureComponent(keyFigure = it)
+                        if (it != viewState.characterKeyFigures.last()) {
+                            Spacer(modifier = Modifier.height(32.dp))
+                        }
+                    }
+                    item { Spacer(modifier = Modifier.height(64.dp)) }
+                    item {
+                        Text(
+                            text = "View all episodes",
+                            color = Color.Cyan,
+                            fontSize = 18.sp,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier
+                                .padding(horizontal = 32.dp, vertical = 8.dp)
+                                .border(
+                                    width = 1.dp,
+                                    color = Color.Cyan,
+                                    shape = RoundedCornerShape(8.dp)
+                                )
+                                .clip(RoundedCornerShape(12.dp))
+                                .clickable {
+                                    onNavigateToEpisodes(characterId)
+                                }
+                        )
+                    }
+                    item { Spacer(modifier = Modifier.height(64.dp)) }
                 }
-                item { Spacer(modifier = Modifier.height(64.dp)) }
-                item {
-                    Text(
-                        text = "View all episodes",
-                        color = Color.Cyan,
-                        fontSize = 18.sp,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier
-                            .padding(horizontal = 32.dp, vertical = 8.dp)
-                            .border(
-                                width = 1.dp,
-                                color = Color.Cyan,
-                                shape = RoundedCornerShape(8.dp)
-                            )
-                            .clip(RoundedCornerShape(12.dp))
-                            .clickable {
-                                onNavigateToEpisodes(characterId)
-                            }
-                    )
+                CharacterDetailsViewState.Loading -> {
+                    item { LoadingSpinnerComponent() }
                 }
-                item { Spacer(modifier = Modifier.height(64.dp)) }
-            }
-            CharacterDetailsViewState.Loading -> {
-                item { LoadingSpinnerComponent() }
             }
         }
     }

@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import dagger.hilt.android.AndroidEntryPoint
 import dev.ansgrb.dimension_35_c.ui.screen.CharacterDetailsScreen
 import dev.ansgrb.dimension_35_c.ui.screen.CharacterEpisodeScreen
@@ -38,6 +39,9 @@ class MainActivity : ComponentActivity() {
 //        enableEdgeToEdge()
         setContent {
             val navController = rememberNavController()
+            val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
+
+            // TODO: Update the MainActivity to use the Bottom Navigation Bar **add a surface to hold the bottom navigation bar**
 
             Dimension35cTheme {
                 Surface(

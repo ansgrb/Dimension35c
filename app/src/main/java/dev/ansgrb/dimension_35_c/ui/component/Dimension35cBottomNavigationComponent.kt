@@ -35,7 +35,7 @@ enum class BottomNavItems(
     val label: String
 ) {
     HOME("home", Icons.Default.Home, "Home"),
-    CHARACTERS("episodes", Icons.AutoMirrored.Filled.List, "Episodes"),
+    EPISODES("episodes", Icons.AutoMirrored.Filled.List, "Episodes"),
     SEARCH("search", Icons.Default.Search, "Search")
 }
 

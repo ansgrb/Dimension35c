@@ -107,24 +107,28 @@ class KtorClient {
 
     suspend fun getAllEpisodes(): ApiOps<List<Episode>> {
         val data = mutableListOf<Episode>()
-        var exception: Exception? = null
 
-        getEpisodesByPage(1).onMade {
-            val totalPages = it.info.pages
-            data.addAll(it.results)
+        return try {
+            // Get first page
+            when (val firstPageResult = getEpisodesByPage(1)) {
+                is ApiOps.Made -> {
+                    data.addAll(firstPageResult.data.results)
+                    val totalPages = firstPageResult.data.info.pages
 
-            repeat(totalPages - 1) { index ->
-                getEpisodesByPage(pageNo = index + 2).onMade { nextPage ->
-                    data.addAll(nextPage.results)
-                }.onFailed {
-                    exception = it
+                    // Get remaining pages
+                    for (page in 2..totalPages) {
+                        when (val nextPageResult = getEpisodesByPage(page)) {
+                            is ApiOps.Made -> data.addAll(nextPageResult.data.results)
+                            is ApiOps.Failed -> return ApiOps.Failed(nextPageResult.exception)
+                        }
+                    }
+                    ApiOps.Made(data)
                 }
-                if (exception != null) return@onMade
+                is ApiOps.Failed -> ApiOps.Failed(firstPageResult.exception)
             }
-        }.onFailed {
-            exception = it
+        } catch (e: Exception) {
+            ApiOps.Failed(e)
         }
-        return exception?.let { ApiOps.Failed(it) } ?: ApiOps.Made(data)
     }
 
     private inline fun <T> safeApiCall(apiCall: () -> T): ApiOps<T> {
@@ -141,7 +145,7 @@ sealed interface ApiOps<T> {
     data class Made<T>(val data: T) : ApiOps<T>
     data class Failed<T>(val exception: Exception) : ApiOps<T>
 
-    suspend fun onMade(block: suspend (T) -> Unit): ApiOps<T> {
+    fun onMade(block: (T) -> Unit): ApiOps<T> {
         if (this is Made) block(data)
         return this
     }

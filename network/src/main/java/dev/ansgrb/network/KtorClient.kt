@@ -19,12 +19,15 @@ package dev.ansgrb.network
 import dev.ansgrb.network.models.domain.Character
 import dev.ansgrb.network.models.domain.CharacterPage
 import dev.ansgrb.network.models.domain.Episode
+import dev.ansgrb.network.models.domain.EpisodePage
 import dev.ansgrb.network.models.remote.RemoteCharacter
 import dev.ansgrb.network.models.remote.RemoteCharacterPage
 import dev.ansgrb.network.models.remote.RemoteEpisode
+import dev.ansgrb.network.models.remote.RemoteEpisodePage
 import dev.ansgrb.network.models.remote.toDomainCharacter
 import dev.ansgrb.network.models.remote.toDomainCharacterPage
 import dev.ansgrb.network.models.remote.toDomainEpisode
+import dev.ansgrb.network.models.remote.toDomainEpisodePage
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.engine.okhttp.OkHttp
@@ -90,6 +93,40 @@ class KtorClient {
         }
     }
 
+    suspend fun getEpisodesByPage(pageNo: Int): ApiOps<EpisodePage> {
+        return safeApiCall {
+            client.get("episode") {
+                url {
+                    parameters.append("page", pageNo.toString())
+                }
+            }
+                .body<RemoteEpisodePage>()
+                .toDomainEpisodePage()
+        }
+    }
+
+    suspend fun getAllEpisodes(): ApiOps<List<Episode>> {
+        val data = mutableListOf<Episode>()
+        var exception: Exception? = null
+
+        getEpisodesByPage(1).onMade {
+            val totalPages = it.info.pages
+            data.addAll(it.results)
+
+            repeat(totalPages - 1) { index ->
+                getEpisodesByPage(pageNo = index + 2).onMade { nextPage ->
+                    data.addAll(nextPage.results)
+                }.onFailed {
+                    exception = it
+                }
+                if (exception != null) return@onMade
+            }
+        }.onFailed {
+            exception = it
+        }
+        return exception?.let { ApiOps.Failed(it) } ?: ApiOps.Made(data)
+    }
+
     private inline fun <T> safeApiCall(apiCall: () -> T): ApiOps<T> {
         return try {
             ApiOps.Made(data = apiCall())
@@ -104,7 +141,7 @@ sealed interface ApiOps<T> {
     data class Made<T>(val data: T) : ApiOps<T>
     data class Failed<T>(val exception: Exception) : ApiOps<T>
 
-    fun onMade(block: (T) -> Unit): ApiOps<T> {
+    suspend fun onMade(block: suspend (T) -> Unit): ApiOps<T> {
         if (this is Made) block(data)
         return this
     }

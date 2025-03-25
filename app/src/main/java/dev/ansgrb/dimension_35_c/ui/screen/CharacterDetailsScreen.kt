@@ -159,8 +159,6 @@ fun CharacterDetailsScreen(
                 CharacterDetailsViewState.Loading -> {
                     item { LoadingSpinnerComponent() }
                 }
-
-                is ForAllEpisodesScreenViewState.Loaded -> TODO()
             }
         }
     }

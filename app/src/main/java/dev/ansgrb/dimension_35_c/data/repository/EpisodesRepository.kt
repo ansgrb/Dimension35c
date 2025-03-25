@@ -16,9 +16,12 @@
  */
 package dev.ansgrb.dimension_35_c.data.repository
 
+import dev.ansgrb.network.ApiOps
 import dev.ansgrb.network.KtorClient
+import dev.ansgrb.network.models.domain.Episode
 import javax.inject.Inject
 
 
 class EpisodesRepository @Inject constructor(private val ktorClient: KtorClient) {
+    suspend fun forAllEpisodesFetch(): ApiOps<List<Episode>> = ktorClient.getAllEpisodes()
 }

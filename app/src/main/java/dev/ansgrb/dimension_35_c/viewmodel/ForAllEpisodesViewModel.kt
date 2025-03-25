@@ -17,14 +17,37 @@
 package dev.ansgrb.dimension_35_c.viewmodel
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.ansgrb.dimension_35_c.data.repository.EpisodesRepository
+import dev.ansgrb.dimension_35_c.ui.screen.ForAllEpisodesScreenViewState
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class ForAllEpisodesScreenViewModel @Inject constructor(
     private val episodesRepository: EpisodesRepository
 ): ViewModel() {
-    // TODO: Implement ViewModel
+    private val _viewState = MutableStateFlow<ForAllEpisodesScreenViewState>(ForAllEpisodesScreenViewState.Loading)
+    val viewState = _viewState.asStateFlow()
+
+    fun fetchForAllEpisodes(forceRefresh: Boolean = false) = viewModelScope.launch {
+        if (forceRefresh) _viewState.update { ForAllEpisodesScreenViewState.Loading }
+        episodesRepository.forAllEpisodesFetch().onMade { episodesInAList ->
+            _viewState.update {
+                ForAllEpisodesScreenViewState.Loaded(
+                    data = episodesInAList.groupBy { it.seasonNumber.toString() }.mapKeys {
+                        "Season ${it.key}"
+                    }
+                )
+            }
+        }.onFailed { exception ->
+            _viewState.update { ForAllEpisodesScreenViewState.Error(exception.message ?: "Unknown error") }
+        }
+
+    }
 }
 

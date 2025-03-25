@@ -17,8 +17,21 @@
 package dev.ansgrb.dimension_35_c.ui.screen
 
 import androidx.compose.runtime.Composable
+import androidx.hilt.navigation.compose.hiltViewModel
+import dev.ansgrb.network.models.domain.Episode
+
+
+sealed interface ForAllEpisodesScreenViewState {
+    object Loading : ForAllEpisodesScreenViewState
+    data class Loaded(
+        val data: Map<String, List<Episode>>
+    ) : ForAllEpisodesScreenViewState
+    data class Error(val message: String) : ForAllEpisodesScreenViewState
+}
 
 @Composable
-fun ForAllEpisodesScreen() {
+fun ForAllEpisodesScreen(
+    vieomodel: ForAllEpisodesScreenViewState = hiltViewModel()
+) {
     // TODO: Implement this screen
 }

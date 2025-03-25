@@ -22,6 +22,7 @@ import dev.ansgrb.dimension_35_c.ui.component.BottomNavItems
 import dev.ansgrb.dimension_35_c.ui.component.Dimension35cBottomNavigationComponent
 import dev.ansgrb.dimension_35_c.ui.screen.CharacterDetailsScreen
 import dev.ansgrb.dimension_35_c.ui.screen.CharacterEpisodeScreen
+import dev.ansgrb.dimension_35_c.ui.screen.ForAllEpisodesScreen
 import dev.ansgrb.dimension_35_c.ui.screen.MainScreen
 import dev.ansgrb.dimension_35_c.ui.theme.Dimension35cTheme
 import dev.ansgrb.network.KtorClient
@@ -81,10 +82,7 @@ class MainActivity : ComponentActivity() {
                                 )
                             }
                             composable(BottomNavItems.EPISODES.route) {
-                                // TODO: Implement Episodes screen
-                                Box(contentAlignment = Alignment.Center) {
-                                    Text("Episodes")
-                                }
+                                ForAllEpisodesScreen()
                             }
                             composable(BottomNavItems.SEARCH.route) {
                                 // TODO: Implement Search screen

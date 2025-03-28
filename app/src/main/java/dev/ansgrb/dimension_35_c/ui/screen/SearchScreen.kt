@@ -16,7 +16,38 @@
  */
 package dev.ansgrb.dimension_35_c.ui.screen
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import dev.ansgrb.dimension_35_c.ui.component.CharacterGridItemComponent
+import dev.ansgrb.dimension_35_c.ui.component.Dimension35cToolbarComponent
+import dev.ansgrb.dimension_35_c.ui.component.LoadingSpinnerComponent
+import dev.ansgrb.dimension_35_c.viewmodel.SearchScreenViewModel
 import dev.ansgrb.network.models.domain.Character
 
 sealed interface SearchState {
@@ -26,7 +57,130 @@ sealed interface SearchState {
     data class Error(val message: String) : SearchState
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SearchScreen() {
-    // TODO: Implement SearchScreen
+fun SearchScreen(
+    viewModel: SearchScreenViewModel = hiltViewModel(),
+    onCharacterClick: (Int) -> Unit,
+//    onBackClick: () -> Unit,
+//    onSearch: (String) -> Unit,
+//    onSearchClear: () -> Unit,
+//    onSearchFocusChange: (Boolean) -> Unit,
+//    onSearchTextChange: (String) -> Unit,
+) {
+    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
+    val searchQuery by viewModel.searchQuery.collectAsState()
+    val searchResults by viewModel.searchResults.collectAsState()
+
+    Scaffold(
+        topBar = {
+            Dimension35cToolbarComponent(
+                title = "Search",
+                showBackButton = false,
+                scrollBehavior = scrollBehavior,
+            )
+        },
+        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection)
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+        ) {
+            SearchBar(
+                query = searchQuery,
+                onQueryChange = { query ->
+                    viewModel.onSearchQueryChanged(query)
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+            )
+
+            when (val state = searchResults) {
+                is SearchState.Initial -> {
+                    EmptyStateMessage(
+                        text = "Start typing to search for characters",
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(16.dp)
+                    )
+                }
+                is SearchState.Loading -> {
+                    LoadingSpinnerComponent()
+                }
+                is SearchState.Loaded -> {
+                    if (state.characters.isEmpty()) {
+                        EmptyStateMessage(text = "No results found")
+                    } else {
+                        LazyVerticalGrid(
+                            columns = GridCells.Fixed(2),
+                            contentPadding = PaddingValues(16.dp),
+                            horizontalArrangement = Arrangement.spacedBy(16.dp),
+                            verticalArrangement = Arrangement.spacedBy(16.dp),
+                            modifier = Modifier.fillMaxSize()
+                        ) {
+                            items(
+                                count = state.characters.size,
+                                key = { index -> state.characters[index].id },
+                            ) { index ->
+                                val character = state.characters[index]
+                                CharacterGridItemComponent(
+                                    character = character,
+                                    modifier = Modifier,
+                                    onClick = { onCharacterClick(character.id) }
+                                )
+                            }
+                        }
+                    }
+                }
+                is SearchState.Error -> {
+                    EmptyStateMessage(
+                        text = state.message,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(16.dp)
+                    )
+                }
+            }
+
+        }
+    }
 }
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun SearchBar(
+    query: String,
+    onQueryChange: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    TextField(
+        value = query,
+        onValueChange = onQueryChange,
+        placeholder = { Text("Search characters...") },
+        leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
+        singleLine = true,
+        shape = RoundedCornerShape(8.dp),
+        modifier = modifier
+    )
+}
+
+@Composable
+private fun EmptyStateMessage(
+    text: String,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = modifier.fillMaxSize()
+    ) {
+        Text(
+            text = text,
+            style = MaterialTheme.typography.bodyLarge,
+            textAlign = TextAlign.Center,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
+}
+

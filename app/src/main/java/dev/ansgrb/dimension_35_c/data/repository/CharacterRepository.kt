@@ -19,6 +19,7 @@ package dev.ansgrb.dimension_35_c.data.repository
 import dev.ansgrb.network.ApiOps
 import dev.ansgrb.network.KtorClient
 import dev.ansgrb.network.models.domain.Character
+import dev.ansgrb.network.models.domain.CharacterFilter
 import dev.ansgrb.network.models.domain.CharacterPage
 import javax.inject.Inject
 
@@ -29,6 +30,18 @@ class CharacterRepository @Inject constructor(private val ktorClient: KtorClient
 
     suspend fun fetchCharacter(characterId: Int): ApiOps<Character> {
         return ktorClient.getCharacter(characterId)
+    }
+
+    suspend fun fetchCharacters(query: String): ApiOps<CharacterPage> {
+        return ktorClient.searchCharacters(name = query)
+    }
+
+    suspend fun searchCharacters(query: String): ApiOps<CharacterPage> {
+        return ktorClient.searchCharacters(query)
+    }
+
+    suspend fun searchCharacters(filter: CharacterFilter): ApiOps<CharacterPage> {
+        return ktorClient.searchCharacters(filter)
     }
 }
 

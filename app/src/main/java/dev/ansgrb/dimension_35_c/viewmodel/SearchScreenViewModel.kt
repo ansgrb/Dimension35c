@@ -22,9 +22,9 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.ansgrb.dimension_35_c.data.repository.CharacterRepository
 import dev.ansgrb.dimension_35_c.ui.screen.SearchState
 import dev.ansgrb.network.ApiOps
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.FlowPreview
+import dev.ansgrb.network.models.domain.CharacterFilter
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
@@ -34,39 +34,53 @@ class SearchScreenViewModel @Inject constructor(
     private val _searchQuery = MutableStateFlow("")
     val searchQuery = _searchQuery.asStateFlow()
 
-    @OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
-    val searchResults = _searchQuery
-        .debounce(500L)
-        .distinctUntilChanged()
-        .filter { it.length >= 2 }
-        .flatMapLatest { query ->
-            flow {
-                emit(SearchState.Loading)
+    private val _searchResults = MutableStateFlow<SearchState>(SearchState.Initial)
+    val searchResults = _searchResults.asStateFlow()
+
+    init {
+        _searchQuery
+            .debounce(500L)
+            .distinctUntilChanged()
+            .filter { it.length >= 2 }
+            .onEach { query ->
+                _searchResults.value = SearchState.Loading
                 try {
-                    val response = characterRepository.fetchCharacters(page = 1)
+                    val response = characterRepository.searchCharacters(query)
                     when (response) {
                         is ApiOps.Made -> {
-                            val filteredCharacters = response.data.results.filter { character ->
-                                character.name.contains(query, ignoreCase = true)
-                            }
-                            emit(SearchState.Loaded(filteredCharacters))
+                            _searchResults.value = SearchState.Loaded(response.data.results)
                         }
                         is ApiOps.Failed -> {
-                            emit(SearchState.Error(response.exception.message ?: "Unknown error"))
+                            _searchResults.value = SearchState.Error(response.exception.message ?: "Unknown error")
                         }
                     }
                 } catch (e: Exception) {
-                    emit(SearchState.Error(e.message ?: "An error occurred"))
+                    _searchResults.value = SearchState.Error(e.message ?: "An error occurred")
                 }
             }
-        }
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000L),
-            initialValue = SearchState.Initial
-        )
+            .launchIn(viewModelScope)
+    }
+
     fun onSearchQueryChanged(query: String) {
         _searchQuery.value = query
     }
-}
 
+    fun searchWithFilter(filter: CharacterFilter) {
+        viewModelScope.launch {
+            _searchResults.value = SearchState.Loading
+            try {
+                val response = characterRepository.searchCharacters(filter)
+                when (response) {
+                    is ApiOps.Made -> {
+                        _searchResults.value = SearchState.Loaded(response.data.results)
+                    }
+                    is ApiOps.Failed -> {
+                        _searchResults.value = SearchState.Error(response.exception.message ?: "Unknown error")
+                    }
+                }
+            } catch (e: Exception) {
+                _searchResults.value = SearchState.Error(e.message ?: "An error occurred")
+            }
+        }
+    }
+}

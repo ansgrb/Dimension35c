@@ -17,6 +17,7 @@
 package dev.ansgrb.network
 
 import dev.ansgrb.network.models.domain.Character
+import dev.ansgrb.network.models.domain.CharacterFilter
 import dev.ansgrb.network.models.domain.CharacterPage
 import dev.ansgrb.network.models.domain.Episode
 import dev.ansgrb.network.models.domain.EpisodePage
@@ -39,6 +40,7 @@ import io.ktor.client.plugins.logging.SIMPLE
 import io.ktor.client.request.get
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
+
 
 class KtorClient {
     private val client = HttpClient(OkHttp) {
@@ -129,6 +131,25 @@ class KtorClient {
         } catch (e: Exception) {
             ApiOps.Failed(e)
         }
+    }
+
+    suspend fun searchCharacters(filter: CharacterFilter): ApiOps<CharacterPage> {
+        return safeApiCall {
+            client.get("character") {
+                url {
+                    filter.name?.let { parameters.append("name", it) }
+                    filter.status?.let { parameters.append("status", it) }
+                    filter.species?.let { parameters.append("species", it) }
+                    filter.type?.let { parameters.append("type", it) }
+                    filter.gender?.let { parameters.append("gender", it) }
+                }
+            }.body<RemoteCharacterPage>()
+                .toDomainCharacterPage()
+        }
+    }
+
+    suspend fun searchCharacters(name: String): ApiOps<CharacterPage> {
+        return searchCharacters(CharacterFilter(name = name))
     }
 
     private inline fun <T> safeApiCall(apiCall: () -> T): ApiOps<T> {

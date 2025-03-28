@@ -16,6 +16,7 @@
  */
 package dev.ansgrb.dimension_35_c.ui.screen
 
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -34,10 +35,13 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.unit.dp
+import androidx.compose.animation.core.Spring
+import kotlinx.coroutines.launch
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.ansgrb.dimension_35_c.data.repository.CharacterRepository
@@ -74,14 +78,20 @@ fun MainScreen(
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 
     val viewState by viewModel.viewState.collectAsState()
+
+    val scope = rememberCoroutineScope()
+
     // rememberSavable to maintain scroll position across configuration changes
     val gridState = rememberSaveable(saver = LazyGridState.Saver) {
         LazyGridState(firstVisibleItemIndex = 0, firstVisibleItemScrollOffset = 0)
     }
+
     // Handle scroll to top
     LaunchedEffect(scrollToTop) {
         if (scrollToTop && gridState.canScrollBackward) {
-            gridState.animateScrollToItem(0)
+            scope.launch {
+                gridState.scrollToItem(0)
+            }
             onScrollToTopHandled()
         }
     }

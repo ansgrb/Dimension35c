@@ -10,6 +10,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -46,6 +51,8 @@ class MainActivity : ComponentActivity() {
             val navController = rememberNavController()
             val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
 
+            var previousRoute by remember { mutableStateOf<String?>(null) }
+
             Dimension35cTheme {
                 Surface(
                     modifier = Modifier
@@ -57,12 +64,19 @@ class MainActivity : ComponentActivity() {
                                 Dimension35cBottomNavigationComponent(
                                     currentRoute = currentRoute,
                                     onNavigate = { item ->
-                                        navController.navigate(item.route) {
-                                            popUpTo(navController.graph.findStartDestination().id) {
-                                                saveState = true
+                                        // Check if the current route is the same as the previous route
+                                        if (currentRoute == item.route) {
+                                            navController.currentBackStackEntry
+                                                ?.savedStateHandle
+                                                ?.set("scrollToTop", true)
+                                        } else {
+                                            navController.navigate(item.route) {
+                                                popUpTo(navController.graph.findStartDestination().id) {
+                                                    saveState = true
+                                                }
+                                                launchSingleTop = true
+                                                restoreState = true
                                             }
-                                            launchSingleTop = true
-                                            restoreState = true
                                         }
                                     }
                                 )
@@ -76,10 +90,18 @@ class MainActivity : ComponentActivity() {
                                 .padding(paddingValues)
                         ) {
                             composable(BottomNavItems.HOME.route) {
+                                val scrollToTop by it.savedStateHandle
+                                    .getStateFlow("scrollToTop", false)
+                                    .collectAsState()
+
                                 MainScreen(
                                     onCharacterClicked = { characterId ->
                                         navController.navigate("characterDetails/$characterId")
                                     },
+                                    scrollToTop = scrollToTop,
+                                    onScrollToTopHandled = {
+                                        it.savedStateHandle["scrollToTop"] = false
+                                    }
                                 )
                             }
                             composable(BottomNavItems.EPISODES.route) {

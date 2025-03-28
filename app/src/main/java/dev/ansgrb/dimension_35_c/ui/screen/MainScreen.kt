@@ -67,9 +67,24 @@ sealed interface MainViewState {
 @Composable
 fun MainScreen(
     onCharacterClicked: (Int) -> Unit,
-    viewModel: MainViewModel = hiltViewModel()
+    viewModel: MainViewModel = hiltViewModel(),
+    scrollToTop: Boolean = false,
+    onScrollToTopHandled: () -> Unit = {}
 ) {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
+
+    val viewState by viewModel.viewState.collectAsState()
+    // rememberSavable to maintain scroll position across configuration changes
+    val gridState = rememberSaveable(saver = LazyGridState.Saver) {
+        LazyGridState(firstVisibleItemIndex = 0, firstVisibleItemScrollOffset = 0)
+    }
+    // Handle scroll to top
+    LaunchedEffect(scrollToTop) {
+        if (scrollToTop && gridState.canScrollBackward) {
+            gridState.animateScrollToItem(0)
+            onScrollToTopHandled()
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -81,17 +96,12 @@ fun MainScreen(
         },
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection)
     ) { paddingValues ->
-        val viewState by viewModel.viewState.collectAsState()
-
-        val gridState = rememberLazyGridState()
-
         // Only fetch if we're in Loading state and have no characters
         LaunchedEffect(Unit) {
             if (viewState is MainViewState.Loading) {
                 viewModel.fetchCharacters()
             }
         }
-
         when (val state = viewState) {
             is MainViewState.Loading -> {
                 LoadingSpinnerComponent()

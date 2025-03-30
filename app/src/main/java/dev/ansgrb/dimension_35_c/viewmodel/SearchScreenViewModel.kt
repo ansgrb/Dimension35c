@@ -28,7 +28,9 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import dev.ansgrb.network.models.domain.Dimension34cCharacter
+import kotlinx.coroutines.FlowPreview
 
+@OptIn(FlowPreview::class)
 @HiltViewModel
 class SearchScreenViewModel @Inject constructor(
     private val characterRepository: CharacterRepository
@@ -48,20 +50,7 @@ class SearchScreenViewModel @Inject constructor(
             .distinctUntilChanged()
             .filter { it.length >= 2 }
             .onEach { query ->
-                _searchResults.value = SearchState.Loading
-                try {
-                    val response = characterRepository.searchCharacters(query)
-                    when (response) {
-                        is ApiOps.Made -> {
-                            _searchResults.value = SearchState.Loaded(response.data.results)
-                        }
-                        is ApiOps.Failed -> {
-                            _searchResults.value = SearchState.Error(response.exception.message ?: "Unknown error")
-                        }
-                    }
-                } catch (e: Exception) {
-                    _searchResults.value = SearchState.Error(e.message ?: "An error occurred")
-                }
+                searchWithCurrentFilters() // replace the direct search with the filtered search
             }
             .launchIn(viewModelScope)
     }
@@ -90,28 +79,11 @@ class SearchScreenViewModel @Inject constructor(
         return allDimension34cCharacters
     }
 
-    fun searchWithFilter(filter: CharacterFilter) {
-        viewModelScope.launch {
-            _searchResults.value = SearchState.Loading
-            try {
-                val response = characterRepository.searchCharacters(filter)
-                when (response) {
-                    is ApiOps.Made -> {
-                        _searchResults.value = SearchState.Loaded(response.data.results)
-                    }
-                    is ApiOps.Failed -> {
-                        _searchResults.value = SearchState.Error(response.exception.message ?: "Unknown error")
-                    }
-                }
-            } catch (e: Exception) {
-                _searchResults.value = SearchState.Error(e.message ?: "An error occurred")
-            }
-        }
-    }
-
     fun onStatusSelected(status: CharacterStatus?) {
         _selectedStatus.value = status
-        searchWithCurrentFilters()
+        if (_searchQuery.value.length >= 2) {
+            searchWithCurrentFilters()
+        }
     }
 
     private fun searchWithCurrentFilters() {

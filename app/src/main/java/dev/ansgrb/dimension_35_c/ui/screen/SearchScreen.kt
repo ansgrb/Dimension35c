@@ -45,6 +45,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import dev.ansgrb.dimension_35_c.ui.component.CharacterGridItemComponent
+import dev.ansgrb.dimension_35_c.ui.component.CharacterListItemComponent
 import dev.ansgrb.dimension_35_c.ui.component.Dimension35cToolbarComponent
 import dev.ansgrb.dimension_35_c.ui.component.LoadingSpinnerComponent
 import dev.ansgrb.dimension_35_c.viewmodel.SearchScreenViewModel
@@ -114,7 +115,7 @@ fun SearchScreen(
                         EmptyStateMessage(text = "No results found")
                     } else {
                         LazyVerticalGrid(
-                            columns = GridCells.Fixed(2),
+                            columns = GridCells.Fixed(1),
                             contentPadding = PaddingValues(16.dp),
                             horizontalArrangement = Arrangement.spacedBy(16.dp),
                             verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -125,7 +126,7 @@ fun SearchScreen(
                                 key = { index -> state.characters[index].id },
                             ) { index ->
                                 val character = state.characters[index]
-                                CharacterGridItemComponent(
+                                CharacterListItemComponent(
                                     character = character,
                                     modifier = Modifier,
                                     onClick = { onCharacterClick(character.id) }
@@ -183,4 +184,5 @@ private fun EmptyStateMessage(
         )
     }
 }
+
 

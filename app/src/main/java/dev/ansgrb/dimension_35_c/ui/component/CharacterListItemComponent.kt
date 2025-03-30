@@ -20,15 +20,23 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.height
 import androidx.compose.material3.Text
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -37,36 +45,56 @@ import dev.ansgrb.network.models.domain.CharacterGender
 import dev.ansgrb.network.models.domain.CharacterStatus
 
 @Composable
-fun CharacterGridItemComponent(
+fun CharacterListItemComponent(
     character: Character,
-    modifier: Modifier,
+    modifier: Modifier = Modifier,
     onClick: () -> Unit
-){
-    Column(
+) {
+    Row(
         modifier = modifier
+            .fillMaxWidth()
             .border(
                 width = 1.dp,
-                brush = Brush.verticalGradient(listOf(Color.White, Color.Transparent)),
+                brush = Brush.horizontalGradient(listOf(Color.White, Color.Transparent)),
                 shape = RoundedCornerShape(12.dp)
             )
             .clip(RoundedCornerShape(12.dp))
             .clickable { onClick() }
+            .padding(8.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Box {
+        Box(
+            modifier = Modifier.size(80.dp)
+        ) {
             ImageComponent(imageUrl = character.imageUrl)
             DotStatusComponent(
                 status = character.status,
-                modifier = Modifier.padding(start = 6.dp, top = 6.dp)
+                modifier = Modifier.padding(start = 4.dp, top = 4.dp)
             )
         }
-        Text(
-            text = character.name,
-            color = Color.White,
-            fontWeight = FontWeight.Bold,
-            fontSize = 26.sp,
-            lineHeight = 26.sp,
-            modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp)
-        )
+
+        Spacer(modifier = Modifier.width(12.dp))
+
+        Column(
+            modifier = Modifier.weight(1f)
+        ) {
+            Text(
+                text = character.name,
+                color = Color.White,
+                fontWeight = FontWeight.Bold,
+                fontSize = 20.sp,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+
+            Spacer(modifier = Modifier.height(4.dp))
+
+            Text(
+                text = character.species,
+                color = Color.White.copy(alpha = 0.7f),
+                fontSize = 14.sp
+            )
+        }
     }
 }
 
@@ -76,30 +104,28 @@ fun CharacterGridItemComponent(
     widthDp = 200
 )
 @Composable
-private fun CharacterGridItemComponentPreview() {
-    val sampleCharacter = Character(
-        id = 1,
-        name = "Rick Sanchez",
-        status = CharacterStatus.Alive,
-        created = "",
-        episodeIds = emptyList(),
-        gender = CharacterGender.Male,
-        imageUrl = "https://rickandmortyapi.com/api/character/avatar/1.jpeg",
-        location = Character.Location(
-            name = "Earth (Replacement Dimension)",
-            url = "https://rickandmortyapi.com/api/location/20"
+fun CharacterListItemComponentPreview() {
+    CharacterListItemComponent(
+        character = Character(
+            created = "timestamp",
+            episodeIds = listOf(1, 2, 3, 4, 5),
+            gender = CharacterGender.Male,
+            id = 123,
+            imageUrl = "https://rickandmortyapi.com/api/character/avatar/2.jpeg",
+            location = Character.Location(
+                name = "Earth",
+                url = ""
+            ),
+            name = "Morty Smith",
+            origin = Character.Origin(
+                name = "Earth",
+                url = ""
+            ),
+            species = "Human",
+            status = CharacterStatus.Alive,
+            type = ""
         ),
-        origin = Character.Origin(
-            name = "Earth (C-137)",
-            url = "https://rickandmortyapi.com/api/location/1"
-        ),
-        species = "Human",
-        type = "Human",
-    )
-
-    CharacterGridItemComponent(
-        character = sampleCharacter,
         modifier = Modifier,
-        onClick = {}
+        onClick = { /* Do something */ }
     )
 }

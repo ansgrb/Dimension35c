@@ -41,6 +41,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.unit.dp
 import androidx.compose.animation.core.Spring
+import androidx.compose.ui.tooling.preview.Preview
 import kotlinx.coroutines.launch
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -48,8 +49,10 @@ import dev.ansgrb.dimension_35_c.data.repository.CharacterRepository
 import dev.ansgrb.dimension_35_c.ui.component.CharacterGridItemComponent
 import dev.ansgrb.dimension_35_c.ui.component.Dimension35cToolbarComponent
 import dev.ansgrb.dimension_35_c.ui.component.LoadingSpinnerComponent
+import dev.ansgrb.dimension_35_c.ui.theme.Dimension35cTheme
 import dev.ansgrb.dimension_35_c.viewmodel.MainViewModel
 import dev.ansgrb.network.models.domain.Character
+import dev.ansgrb.network.models.domain.CharacterStatus
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

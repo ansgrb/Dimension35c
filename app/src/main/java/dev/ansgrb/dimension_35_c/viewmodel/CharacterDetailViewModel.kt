@@ -53,7 +53,7 @@ class CharacterDetailsViewModel @Inject constructor(
             }
             _internalStorageFlow.update {
                 return@update CharacterDetailsViewState.Loaded(
-                    character = character,
+                    dimension34cCharacter = character,
                     characterKeyFigures = keyFigures
                 )
             }

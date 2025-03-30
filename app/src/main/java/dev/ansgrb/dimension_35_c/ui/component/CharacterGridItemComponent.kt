@@ -32,13 +32,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import dev.ansgrb.network.models.domain.Character
+import dev.ansgrb.network.models.domain.Dimension34cCharacter
 import dev.ansgrb.network.models.domain.CharacterGender
 import dev.ansgrb.network.models.domain.CharacterStatus
 
 @Composable
 fun CharacterGridItemComponent(
-    character: Character,
+    dimension34cCharacter: Dimension34cCharacter,
     modifier: Modifier,
     onClick: () -> Unit
 ){
@@ -53,14 +53,14 @@ fun CharacterGridItemComponent(
             .clickable { onClick() }
     ) {
         Box {
-            ImageComponent(imageUrl = character.imageUrl)
+            ImageComponent(imageUrl = dimension34cCharacter.imageUrl)
             DotStatusComponent(
-                status = character.status,
+                status = dimension34cCharacter.status,
                 modifier = Modifier.padding(start = 6.dp, top = 6.dp)
             )
         }
         Text(
-            text = character.name,
+            text = dimension34cCharacter.name,
             color = Color.White,
             fontWeight = FontWeight.Bold,
             fontSize = 26.sp,
@@ -77,7 +77,7 @@ fun CharacterGridItemComponent(
 )
 @Composable
 private fun CharacterGridItemComponentPreview() {
-    val sampleCharacter = Character(
+    val sampleDimension34cCharacter = Dimension34cCharacter(
         id = 1,
         name = "Rick Sanchez",
         status = CharacterStatus.Alive,
@@ -85,11 +85,11 @@ private fun CharacterGridItemComponentPreview() {
         episodeIds = emptyList(),
         gender = CharacterGender.Male,
         imageUrl = "https://rickandmortyapi.com/api/character/avatar/1.jpeg",
-        location = Character.Location(
+        location = Dimension34cCharacter.Location(
             name = "Earth (Replacement Dimension)",
             url = "https://rickandmortyapi.com/api/location/20"
         ),
-        origin = Character.Origin(
+        origin = Dimension34cCharacter.Origin(
             name = "Earth (C-137)",
             url = "https://rickandmortyapi.com/api/location/1"
         ),
@@ -98,7 +98,7 @@ private fun CharacterGridItemComponentPreview() {
     )
 
     CharacterGridItemComponent(
-        character = sampleCharacter,
+        dimension34cCharacter = sampleDimension34cCharacter,
         modifier = Modifier,
         onClick = {}
     )

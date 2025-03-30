@@ -16,7 +16,7 @@
  */
 package dev.ansgrb.network
 
-import dev.ansgrb.network.models.domain.Character
+import dev.ansgrb.network.models.domain.Dimension34cCharacter
 import dev.ansgrb.network.models.domain.CharacterFilter
 import dev.ansgrb.network.models.domain.CharacterPage
 import dev.ansgrb.network.models.domain.Episode
@@ -57,16 +57,16 @@ class KtorClient {
         }
     }
 
-    private var characterCash = mutableMapOf<Int, Character>() // I'm using a map cuz i want to look up things really fucking quickly
+    private var dimension34cCharacterCash = mutableMapOf<Int, Dimension34cCharacter>() // I'm using a map cuz i want to look up things really fucking quickly
 
     // a suspendable function to get a character by id that returns a Character object
-    suspend fun getCharacter(id: Int): ApiOps<Character> {
-        characterCash[id]?.let { return ApiOps.Made(it) } // if we have a cash it will make a hit instantly
+    suspend fun getCharacter(id: Int): ApiOps<Dimension34cCharacter> {
+        dimension34cCharacterCash[id]?.let { return ApiOps.Made(it) } // if we have a cash it will make a hit instantly
         return safeApiCall {
             client.get("character/$id")
                 .body<RemoteCharacter>()
                 .toDomainCharacter()
-                .also { characterCash[id] = it } // first use of also
+                .also { dimension34cCharacterCash[id] = it } // first use of also
         }
     }
 
@@ -142,6 +142,7 @@ class KtorClient {
                     filter.species?.let { parameters.append("species", it) }
                     filter.type?.let { parameters.append("type", it) }
                     filter.gender?.let { parameters.append("gender", it) }
+                    parameters.append("page", filter.page.toString())
                 }
             }.body<RemoteCharacterPage>()
                 .toDomainCharacterPage()

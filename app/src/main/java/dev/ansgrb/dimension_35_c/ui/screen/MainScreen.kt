@@ -16,7 +16,6 @@
  */
 package dev.ansgrb.dimension_35_c.ui.screen
 
-import androidx.compose.animation.core.spring
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -24,7 +23,6 @@ import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.TopAppBarDefaults
@@ -32,38 +30,23 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.ViewModel
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.unit.dp
-import androidx.compose.animation.core.Spring
-import androidx.compose.ui.tooling.preview.Preview
 import kotlinx.coroutines.launch
-import androidx.lifecycle.viewModelScope
-import dagger.hilt.android.lifecycle.HiltViewModel
-import dev.ansgrb.dimension_35_c.data.repository.CharacterRepository
 import dev.ansgrb.dimension_35_c.ui.component.CharacterGridItemComponent
 import dev.ansgrb.dimension_35_c.ui.component.Dimension35cToolbarComponent
 import dev.ansgrb.dimension_35_c.ui.component.LoadingSpinnerComponent
-import dev.ansgrb.dimension_35_c.ui.theme.Dimension35cTheme
 import dev.ansgrb.dimension_35_c.viewmodel.MainViewModel
-import dev.ansgrb.network.models.domain.Character
-import dev.ansgrb.network.models.domain.CharacterStatus
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
-import javax.inject.Inject
+import dev.ansgrb.network.models.domain.Dimension34cCharacter
 
 sealed interface MainViewState {
     object Loading : MainViewState
     data class GridLoaded(
-        val characters: List<Character> = emptyList(),
+        val dimension34cCharacters: List<Dimension34cCharacter> = emptyList(),
         val isLoadingMore: Boolean = false,
         val currentPage: Int = 1,
         val hasMorePages: Boolean = true
@@ -134,11 +117,11 @@ fun MainScreen(
                     modifier = Modifier,
                     content = {
                         items(
-                            items = state.characters,
+                            items = state.dimension34cCharacters,
                             key = { character -> character.id }
                         ) { character ->
                             CharacterGridItemComponent(
-                                character = character,
+                                dimension34cCharacter = character,
                                 modifier = Modifier,
                                 onClick = { onCharacterClicked(character.id) }
                             )

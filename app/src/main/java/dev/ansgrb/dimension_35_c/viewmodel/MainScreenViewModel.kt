@@ -40,7 +40,7 @@ class MainViewModel @Inject constructor(
         initialFetch.onMade { page ->
             _viewState.update {
                 return@update MainViewState.GridLoaded(
-                    characters = page.results,
+                    dimension34cCharacters = page.results,
                     currentPage = 1,
                     hasMorePages = page.info.next != null
                 )
@@ -62,7 +62,7 @@ class MainViewModel @Inject constructor(
         characterRepository.fetchCharacters(page = nextPage).onMade { page ->
             _viewState.update { current ->
                 (current as MainViewState.GridLoaded).copy(
-                    characters = current.characters + page.results,
+                    dimension34cCharacters = current.dimension34cCharacters + page.results,
                     currentPage = nextPage,
                     hasMorePages = page.info.next != null,
                     isLoadingMore = false

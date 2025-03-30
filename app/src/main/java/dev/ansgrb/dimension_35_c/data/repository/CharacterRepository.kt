@@ -18,7 +18,7 @@ package dev.ansgrb.dimension_35_c.data.repository
 
 import dev.ansgrb.network.ApiOps
 import dev.ansgrb.network.KtorClient
-import dev.ansgrb.network.models.domain.Character
+import dev.ansgrb.network.models.domain.Dimension34cCharacter
 import dev.ansgrb.network.models.domain.CharacterFilter
 import dev.ansgrb.network.models.domain.CharacterPage
 import javax.inject.Inject
@@ -28,7 +28,7 @@ class CharacterRepository @Inject constructor(private val ktorClient: KtorClient
         return ktorClient.getCharacterByPage(pageNo = page)
     }
 
-    suspend fun fetchCharacter(characterId: Int): ApiOps<Character> {
+    suspend fun fetchCharacter(characterId: Int): ApiOps<Dimension34cCharacter> {
         return ktorClient.getCharacter(characterId)
     }
 

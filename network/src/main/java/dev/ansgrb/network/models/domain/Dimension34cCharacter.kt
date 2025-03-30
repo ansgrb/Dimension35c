@@ -16,7 +16,7 @@
  */
 package dev.ansgrb.network.models.domain
 
-data class Character(
+data class Dimension34cCharacter(
     val created: String,
     val episodeIds: List<Int>,
     val gender: CharacterGender,

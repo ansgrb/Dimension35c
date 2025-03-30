@@ -19,7 +19,7 @@ package dev.ansgrb.network.models.domain
 
 data class CharacterPage (
     val info: Info,
-    val results: List<Character>
+    val results: List<Dimension34cCharacter>
 ) {
     data class Info(
         val count: Int,

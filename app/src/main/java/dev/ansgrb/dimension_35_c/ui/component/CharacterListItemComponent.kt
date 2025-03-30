@@ -40,13 +40,13 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import dev.ansgrb.network.models.domain.Character
+import dev.ansgrb.network.models.domain.Dimension34cCharacter
 import dev.ansgrb.network.models.domain.CharacterGender
 import dev.ansgrb.network.models.domain.CharacterStatus
 
 @Composable
 fun CharacterListItemComponent(
-    character: Character,
+    dimension34cCharacter: Dimension34cCharacter,
     modifier: Modifier = Modifier,
     onClick: () -> Unit
 ) {
@@ -66,7 +66,7 @@ fun CharacterListItemComponent(
         Box(
             modifier = Modifier.size(80.dp)
         ) {
-            ImageComponent(imageUrl = character.imageUrl)
+            ImageComponent(imageUrl = dimension34cCharacter.imageUrl)
 //            DotStatusComponent(
 //                status = character.status,
 //                modifier = Modifier.padding(start = 4.dp, top = 4.dp)
@@ -79,7 +79,7 @@ fun CharacterListItemComponent(
             modifier = Modifier.weight(1f)
         ) {
             Text(
-                text = character.name,
+                text = dimension34cCharacter.name,
                 color = Color.White,
                 fontWeight = FontWeight.Bold,
                 fontSize = 20.sp,
@@ -90,7 +90,7 @@ fun CharacterListItemComponent(
             Spacer(modifier = Modifier.height(4.dp))
 
             Text(
-                text = character.species,
+                text = dimension34cCharacter.species,
                 color = Color.White.copy(alpha = 0.7f),
                 fontSize = 14.sp
             )
@@ -106,18 +106,18 @@ fun CharacterListItemComponent(
 @Composable
 fun CharacterListItemComponentPreview() {
     CharacterListItemComponent(
-        character = Character(
+        dimension34cCharacter = Dimension34cCharacter(
             created = "timestamp",
             episodeIds = listOf(1, 2, 3, 4, 5),
             gender = CharacterGender.Male,
             id = 123,
             imageUrl = "https://rickandmortyapi.com/api/character/avatar/2.jpeg",
-            location = Character.Location(
+            location = Dimension34cCharacter.Location(
                 name = "Earth",
                 url = ""
             ),
             name = "Morty Smith",
-            origin = Character.Origin(
+            origin = Dimension34cCharacter.Origin(
                 name = "Earth",
                 url = ""
             ),

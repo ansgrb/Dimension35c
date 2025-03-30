@@ -19,7 +19,7 @@ package dev.ansgrb.network.models.remote
 
 import dev.ansgrb.network.models.domain.CharacterGender
 import dev.ansgrb.network.models.domain.CharacterStatus
-import dev.ansgrb.network.models.domain.Character
+import dev.ansgrb.network.models.domain.Dimension34cCharacter
 import kotlinx.serialization.Serializable
 
 // whatever we try to parse a JSON object to a Kotlin object, we need to match the keys that comes back from the api
@@ -51,7 +51,7 @@ data class RemoteCharacter(
     )
 }
 
-fun RemoteCharacter.toDomainCharacter(): Character {
+fun RemoteCharacter.toDomainCharacter(): Dimension34cCharacter {
     val characterGender = when (gender.lowercase()) {
         "female" -> CharacterGender.Female
         "male" -> CharacterGender.Male
@@ -63,15 +63,15 @@ fun RemoteCharacter.toDomainCharacter(): Character {
         "dead" -> CharacterStatus.Dead
         else -> CharacterStatus.Unknown
     }
-    return Character(
+    return Dimension34cCharacter(
         created = created,
         episodeIds = episode.map { it.substring(it.lastIndexOf("/") + 1).toInt() },
         gender = characterGender,
         id = id,
         imageUrl = image,
-        location = Character.Location(name = location.name, url = location.url),
+        location = Dimension34cCharacter.Location(name = location.name, url = location.url),
         name = name,
-        origin = Character.Origin(name = origin.name, url = origin.url),
+        origin = Dimension34cCharacter.Origin(name = origin.name, url = origin.url),
         species = species,
         status = characterStatus,
         type = type

@@ -27,6 +27,7 @@ import dev.ansgrb.network.models.domain.CharacterStatus
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import dev.ansgrb.network.models.domain.Dimension34cCharacter
 
 @HiltViewModel
 class SearchScreenViewModel @Inject constructor(
@@ -69,6 +70,26 @@ class SearchScreenViewModel @Inject constructor(
         _searchQuery.value = query
     }
 
+    private suspend fun fetchAllResults(filter: CharacterFilter): List<Dimension34cCharacter> {
+        val allDimension34cCharacters = mutableListOf<Dimension34cCharacter>()
+
+        when (val firstPage = characterRepository.searchCharacters(filter)) {
+            is ApiOps.Made -> {
+                allDimension34cCharacters.addAll(firstPage.data.results)
+                val totalPages = firstPage.data.info.pages
+
+                for (page in 2..totalPages) {
+                    when (val nextPage = characterRepository.searchCharacters(filter.copy(page = page))) {
+                        is ApiOps.Made -> allDimension34cCharacters.addAll(nextPage.data.results)
+                        is ApiOps.Failed -> throw nextPage.exception
+                    }
+                }
+            }
+            is ApiOps.Failed -> throw firstPage.exception
+        }
+        return allDimension34cCharacters
+    }
+
     fun searchWithFilter(filter: CharacterFilter) {
         viewModelScope.launch {
             _searchResults.value = SearchState.Loading
@@ -94,10 +115,18 @@ class SearchScreenViewModel @Inject constructor(
     }
 
     private fun searchWithCurrentFilters() {
-        val filter = CharacterFilter(
-            name = _searchQuery.value.takeIf { it.isNotEmpty() },
-            status = selectedStatus.value?.displayName
-        )
-        searchWithFilter(filter)
+        viewModelScope.launch {
+            _searchResults.value = SearchState.Loading
+            try {
+                val filter = CharacterFilter(
+                    name = _searchQuery.value.takeIf { it.isNotEmpty() },
+                    status = selectedStatus.value?.displayName
+                )
+                val allCharacters = fetchAllResults(filter)
+                _searchResults.value = SearchState.Loaded(allCharacters)
+            } catch (e: Exception) {
+                _searchResults.value = SearchState.Error(e.message ?: "An error occurred")
+            }
+        }
     }
 }

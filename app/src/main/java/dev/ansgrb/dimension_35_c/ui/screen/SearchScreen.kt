@@ -49,18 +49,17 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import dev.ansgrb.dimension_35_c.ui.component.CharacterGridItemComponent
 import dev.ansgrb.dimension_35_c.ui.component.CharacterListItemComponent
 import dev.ansgrb.dimension_35_c.ui.component.Dimension35cToolbarComponent
 import dev.ansgrb.dimension_35_c.ui.component.LoadingSpinnerComponent
 import dev.ansgrb.dimension_35_c.viewmodel.SearchScreenViewModel
-import dev.ansgrb.network.models.domain.Character
+import dev.ansgrb.network.models.domain.Dimension34cCharacter
 import dev.ansgrb.network.models.domain.CharacterStatus
 
 sealed interface SearchState {
     object Initial : SearchState
     object Loading : SearchState
-    data class Loaded(val characters: List<Character>) : SearchState
+    data class Loaded(val dimension34cCharacters: List<Dimension34cCharacter>) : SearchState
     data class Error(val message: String) : SearchState
 }
 
@@ -124,10 +123,10 @@ fun SearchScreen(
                 }
                 is SearchState.Loaded -> {
                     SearchResultCount(
-                        count = state.characters.size,
+                        count = state.dimension34cCharacters.size,
                         query = searchQuery,
                     )
-                    if (state.characters.isEmpty()) {
+                    if (state.dimension34cCharacters.isEmpty()) {
                         EmptyStateMessage(text = "No results found")
                     } else {
                         LazyVerticalGrid(
@@ -138,12 +137,12 @@ fun SearchScreen(
                             modifier = Modifier.fillMaxSize()
                         ) {
                             items(
-                                count = state.characters.size,
-                                key = { index -> state.characters[index].id },
+                                count = state.dimension34cCharacters.size,
+                                key = { index -> state.dimension34cCharacters[index].id },
                             ) { index ->
-                                val character = state.characters[index]
+                                val character = state.dimension34cCharacters[index]
                                 CharacterListItemComponent(
-                                    character = character,
+                                    dimension34cCharacter = character,
                                     modifier = Modifier,
                                     onClick = { onCharacterClick(character.id) }
                                 )

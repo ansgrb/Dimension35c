@@ -111,6 +111,10 @@ fun SearchScreen(
                     LoadingSpinnerComponent()
                 }
                 is SearchState.Loaded -> {
+                    SearchResultCount(
+                        count = state.characters.size,
+                        query = searchQuery,
+                    )
                     if (state.characters.isEmpty()) {
                         EmptyStateMessage(text = "No results found")
                     } else {
@@ -185,4 +189,20 @@ private fun EmptyStateMessage(
     }
 }
 
-
+@Composable
+private fun SearchResultCount(
+    count: Int,
+    query: String,
+    modifier: Modifier = Modifier
+) {
+    if (query.isNotEmpty()) {
+        Text(
+            text = "$count result${if (count != 1) "s" else ""} found",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp)
+        )
+    }
+}

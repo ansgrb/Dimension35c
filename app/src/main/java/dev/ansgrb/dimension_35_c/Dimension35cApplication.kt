@@ -20,5 +20,5 @@ import android.app.Application
 import dagger.hilt.android.HiltAndroidApp
 
 @HiltAndroidApp
-class Dimention35cApplication: Application() {
+class Dimension35cApplication: Application() {
 }

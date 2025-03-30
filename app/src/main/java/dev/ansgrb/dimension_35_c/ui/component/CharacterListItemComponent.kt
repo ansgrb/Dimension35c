@@ -67,10 +67,10 @@ fun CharacterListItemComponent(
             modifier = Modifier.size(80.dp)
         ) {
             ImageComponent(imageUrl = character.imageUrl)
-            DotStatusComponent(
-                status = character.status,
-                modifier = Modifier.padding(start = 4.dp, top = 4.dp)
-            )
+//            DotStatusComponent(
+//                status = character.status,
+//                modifier = Modifier.padding(start = 4.dp, top = 4.dp)
+//            )
         }
 
         Spacer(modifier = Modifier.width(12.dp))

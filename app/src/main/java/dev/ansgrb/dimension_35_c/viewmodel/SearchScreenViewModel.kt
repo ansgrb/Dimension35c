@@ -23,6 +23,7 @@ import dev.ansgrb.dimension_35_c.data.repository.CharacterRepository
 import dev.ansgrb.dimension_35_c.ui.screen.SearchState
 import dev.ansgrb.network.ApiOps
 import dev.ansgrb.network.models.domain.CharacterFilter
+import dev.ansgrb.network.models.domain.CharacterStatus
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -33,6 +34,9 @@ class SearchScreenViewModel @Inject constructor(
 ) : ViewModel() {
     private val _searchQuery = MutableStateFlow("")
     val searchQuery = _searchQuery.asStateFlow()
+
+    private val _selectedStatus = MutableStateFlow<CharacterStatus?>(null)
+    val selectedStatus = _selectedStatus.asStateFlow()
 
     private val _searchResults = MutableStateFlow<SearchState>(SearchState.Initial)
     val searchResults = _searchResults.asStateFlow()
@@ -82,5 +86,18 @@ class SearchScreenViewModel @Inject constructor(
                 _searchResults.value = SearchState.Error(e.message ?: "An error occurred")
             }
         }
+    }
+
+    fun onStatusSelected(status: CharacterStatus?) {
+        _selectedStatus.value = status
+        searchWithCurrentFilters()
+    }
+
+    private fun searchWithCurrentFilters() {
+        val filter = CharacterFilter(
+            name = _searchQuery.value.takeIf { it.isNotEmpty() },
+            status = selectedStatus.value?.displayName
+        )
+        searchWithFilter(filter)
     }
 }

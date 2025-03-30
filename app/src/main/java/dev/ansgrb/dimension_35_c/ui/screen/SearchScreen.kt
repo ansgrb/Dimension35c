@@ -16,19 +16,24 @@
  */
 package dev.ansgrb.dimension_35_c.ui.screen
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -50,6 +55,7 @@ import dev.ansgrb.dimension_35_c.ui.component.Dimension35cToolbarComponent
 import dev.ansgrb.dimension_35_c.ui.component.LoadingSpinnerComponent
 import dev.ansgrb.dimension_35_c.viewmodel.SearchScreenViewModel
 import dev.ansgrb.network.models.domain.Character
+import dev.ansgrb.network.models.domain.CharacterStatus
 
 sealed interface SearchState {
     object Initial : SearchState
@@ -72,6 +78,7 @@ fun SearchScreen(
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     val searchQuery by viewModel.searchQuery.collectAsState()
     val searchResults by viewModel.searchResults.collectAsState()
+    val selectedStatus by viewModel.selectedStatus.collectAsState()
 
     Scaffold(
         topBar = {
@@ -97,7 +104,12 @@ fun SearchScreen(
                     .fillMaxWidth()
                     .padding(16.dp)
             )
-
+            StatusFilterChips(
+                selectedStatus = selectedStatus,
+                onStatusSelected = { status ->
+                    viewModel.onStatusSelected(status)
+                },
+            )
             when (val state = searchResults) {
                 is SearchState.Initial -> {
                     EmptyStateMessage(
@@ -203,6 +215,62 @@ private fun SearchResultCount(
             modifier = modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp)
+        )
+    }
+}
+
+@Composable
+private fun StatusFilterChips(
+    selectedStatus: CharacterStatus?,
+    onStatusSelected: (CharacterStatus?) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        FilterChip(
+            selected = selectedStatus == null,
+            onClick = { onStatusSelected(null) },
+            label = { Text("All") }
+        )
+        FilterChip(
+            selected = selectedStatus == CharacterStatus.Alive,
+            onClick = { onStatusSelected(CharacterStatus.Alive) },
+            leadingIcon = {
+                Box(
+                    modifier = Modifier
+                        .size(8.dp)
+                        .background(CharacterStatus.Alive.color, CircleShape)
+                )
+            },
+            label = { Text("Alive") }
+        )
+        FilterChip(
+            selected = selectedStatus == CharacterStatus.Dead,
+            onClick = { onStatusSelected(CharacterStatus.Dead) },
+            leadingIcon = {
+                Box(
+                    modifier = Modifier
+                        .size(8.dp)
+                        .background(CharacterStatus.Dead.color, CircleShape)
+                )
+            },
+            label = { Text("Dead") }
+        )
+        FilterChip(
+            selected = selectedStatus == CharacterStatus.Unknown,
+            onClick = { onStatusSelected(CharacterStatus.Unknown) },
+            leadingIcon = {
+                Box(
+                    modifier = Modifier
+                        .size(8.dp)
+                        .background(CharacterStatus.Unknown.color, CircleShape)
+                )
+            },
+            label = { Text("Unknown") }
         )
     }
 }

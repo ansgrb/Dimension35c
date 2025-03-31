@@ -16,6 +16,7 @@ coil = "3.1.0"
 navCompose = "2.8.9"
 hilt = "2.55"
 hitlNavigationCompose = "1.2.0"
+googleFonts = "1.2.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -45,6 +46,7 @@ navigation-compose = { group = "androidx.navigation", name = "navigation-compose
 hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
 hilt-compiler = { group = "com.google.dagger", name = "hilt-android-compiler", version.ref = "hilt" }
 hilt-navigation-compose = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "hitlNavigationCompose"  }
+google-fonts = { group = "androidx.compose.ui", name = "ui-text-google-fonts", version.ref = "googleFonts" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

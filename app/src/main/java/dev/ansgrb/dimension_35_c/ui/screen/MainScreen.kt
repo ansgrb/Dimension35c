@@ -61,7 +61,9 @@ fun MainScreen(
     scrollToTop: Boolean = false,
     onScrollToTopHandled: () -> Unit = {}
 ) {
-    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
+//    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
+    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
+
 
     val viewState by viewModel.viewState.collectAsState()
 
@@ -107,10 +109,10 @@ fun MainScreen(
                     state = gridState,
                     columns = GridCells.Fixed(2),
                     contentPadding = PaddingValues(
-                        top = paddingValues.calculateTopPadding() + 16.dp,
+                        top = paddingValues.calculateTopPadding(),
                         start = 16.dp,
                         end = 16.dp,
-                        bottom = 16.dp
+                        bottom = paddingValues.calculateBottomPadding()
                     ),
                     horizontalArrangement = Arrangement.spacedBy(16.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp),

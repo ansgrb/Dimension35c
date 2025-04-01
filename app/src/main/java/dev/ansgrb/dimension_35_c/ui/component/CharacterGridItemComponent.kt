@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -46,7 +47,15 @@ fun CharacterGridItemComponent(
         modifier = modifier
             .border(
                 width = 1.dp,
-                brush = Brush.verticalGradient(listOf(Color.White, Color.Transparent)),
+                brush = Brush.verticalGradient(
+                    listOf(
+                        MaterialTheme.colorScheme.primary,
+//                        MaterialTheme.colorScheme.error,
+                        Color.Transparent
+                    ),
+                    startY = 0f,
+                    endY = 1000f
+                ),
                 shape = RoundedCornerShape(12.dp)
             )
             .clip(RoundedCornerShape(12.dp))
@@ -61,10 +70,11 @@ fun CharacterGridItemComponent(
         }
         Text(
             text = dimension34cCharacter.name,
-            color = Color.White,
+            color = MaterialTheme.colorScheme.primary,
             fontWeight = FontWeight.Bold,
             fontSize = 26.sp,
             lineHeight = 26.sp,
+            maxLines = 1,
             modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp)
         )
     }

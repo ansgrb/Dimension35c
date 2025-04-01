@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -53,14 +54,14 @@ fun EpisodeRowComponent(
             Text(
                 text = episode.name,
                 fontSize = 24.sp,
-                color = Color.White,
+                color = MaterialTheme.colorScheme.primary,
                 textAlign = TextAlign.End,
                 modifier = Modifier.fillMaxWidth()
             )
             Text(
                 text = episode.airDate,
                 fontSize = 16.sp,
-                color = Color.White,
+                color = MaterialTheme.colorScheme.primary,
                 textAlign = TextAlign.End,
                 fontStyle = FontStyle.Italic,
                 modifier = Modifier.fillMaxWidth()

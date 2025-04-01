@@ -32,6 +32,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -54,7 +55,7 @@ fun Dimension35cToolbarComponent(
     actions: @Composable RowScope.() -> Unit = {},
     colors: TopAppBarColors = TopAppBarDefaults.topAppBarColors(
         containerColor = MaterialTheme.colorScheme.surface,
-        titleContentColor = MaterialTheme.colorScheme.onPrimary,
+        titleContentColor = MaterialTheme.colorScheme.primary,
         scrolledContainerColor = MaterialTheme.colorScheme.surface
     ),
 //    scrollBehavior: TopAppBarScrollBehavior? = TopAppBarDefaults.enterAlwaysScrollBehavior()
@@ -70,7 +71,7 @@ fun Dimension35cToolbarComponent(
             Text(
                 text = title,
                 style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.onPrimary,
+                color = MaterialTheme.colorScheme.primary,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )

@@ -132,12 +132,12 @@ private fun Header(seasonName: String, uniqueCharacterCount: Int) {
         Text(
             text = seasonName,
             fontWeight = FontWeight.Bold,
-            color = Color.White,
+            color = MaterialTheme.colorScheme.primary,
             fontSize = 25.sp
         )
         Text(
             text = "$uniqueCharacterCount unique characters",
-            color = Color.White,
+            color = MaterialTheme.colorScheme.primary,
             fontStyle = FontStyle.Italic,
             fontSize = 18.sp
         )
@@ -147,7 +147,7 @@ private fun Header(seasonName: String, uniqueCharacterCount: Int) {
                 .padding(top = 4.dp)
                 .height(4.dp)
                 .background(
-                    color = Color.White,
+                    color = MaterialTheme.colorScheme.primary,
                     shape = RoundedCornerShape(2.dp)
                 )
         )

@@ -48,7 +48,7 @@ fun ImageComponent(
         modifier = modifier
             .fillMaxWidth()
             .aspectRatio(1f)
-            .clip(RoundedCornerShape(12.dp))
+            .clip(RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp, bottomStart = 0.dp, bottomEnd = 0.dp))
     )
 }
 

@@ -18,6 +18,7 @@ package dev.ansgrb.dimension_35_c.ui.component
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -36,12 +37,12 @@ fun KeyFigureComponent(keyFigure: KeyFigure) {
             text = keyFigure.title,
             fontSize = 12.sp,
             fontWeight = FontWeight.Bold,
-            color = Color.Cyan
+            color = MaterialTheme.colorScheme.error
         )
         Text(
             text = keyFigure.description,
             fontSize = 18.sp,
-            color = Color.White
+            color = MaterialTheme.colorScheme.primary
         )
     }
 }

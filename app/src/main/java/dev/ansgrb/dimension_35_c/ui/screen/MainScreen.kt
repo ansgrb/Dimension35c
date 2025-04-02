@@ -24,8 +24,6 @@ import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -34,11 +32,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import dev.ansgrb.dimension_35_c.ui.component.CharacterGridItemComponent
-import dev.ansgrb.dimension_35_c.ui.component.Dimension35cToolbarComponent
 import dev.ansgrb.dimension_35_c.ui.component.LoadingSpinnerComponent
 import dev.ansgrb.dimension_35_c.viewmodel.MainViewModel
 import dev.ansgrb.network.models.domain.Dimension34cCharacter
@@ -61,12 +57,7 @@ fun MainScreen(
     scrollToTop: Boolean = false,
     onScrollToTopHandled: () -> Unit = {}
 ) {
-//    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
-    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
-
-
     val viewState by viewModel.viewState.collectAsState()
-
     val scope = rememberCoroutineScope()
 
     // rememberSavable to maintain scroll position across configuration changes
@@ -84,65 +75,50 @@ fun MainScreen(
         }
     }
 
-    Scaffold(
-        topBar = {
-            Dimension35cToolbarComponent(
-                title = "Dimension 35-c ",
-                showBackButton = false,
-                scrollBehavior = scrollBehavior
-            )
-        },
-        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection)
-    ) { paddingValues ->
-        // Only fetch if we're in Loading state and have no characters
-        LaunchedEffect(Unit) {
-            if (viewState is MainViewState.Loading) {
-                viewModel.fetchCharacters()
-            }
+    // Initial fetch, Only fetch if we're in Loading state and have no characters
+    LaunchedEffect(Unit) {
+        if (viewState is MainViewState.Loading) {
+            viewModel.fetchCharacters()
         }
-        when (val state = viewState) {
-            is MainViewState.Loading -> {
-                LoadingSpinnerComponent()
-            }
-            is MainViewState.GridLoaded -> {
-                LazyVerticalGrid(
-                    state = gridState,
-                    columns = GridCells.Fixed(2),
-                    contentPadding = PaddingValues(
-                        top = paddingValues.calculateTopPadding(),
-                        start = 16.dp,
-                        end = 16.dp,
-                        bottom = paddingValues.calculateBottomPadding()
-                    ),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp),
-                    modifier = Modifier,
-                    content = {
-                        items(
-                            items = state.dimension34cCharacters,
-                            key = { character -> character.id }
-                        ) { character ->
-                            CharacterGridItemComponent(
-                                dimension34cCharacter = character,
-                                modifier = Modifier,
-                                onClick = { onCharacterClicked(character.id) }
-                            )
+    }
+
+    when (val state = viewState) {
+        is MainViewState.Loading -> {
+            LoadingSpinnerComponent()
+        }
+        is MainViewState.GridLoaded -> {
+            LazyVerticalGrid(
+                state = gridState,
+                columns = GridCells.Fixed(2),
+                contentPadding = PaddingValues(16.dp),
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                modifier = Modifier,
+                content = {
+                    items(
+                        items = state.dimension34cCharacters,
+                        key = { character -> character.id }
+                    ) { character ->
+                        CharacterGridItemComponent(
+                            dimension34cCharacter = character,
+                            modifier = Modifier,
+                            onClick = { onCharacterClicked(character.id) }
+                        )
+                    }
+                    if (state.isLoadingMore) {
+                        item(span = { GridItemSpan(2) }) {
+                            LoadingSpinnerComponent()
                         }
-                        if (state.isLoadingMore) {
-                            item(span = { GridItemSpan(2) }) {
-                                LoadingSpinnerComponent()
-                            }
-                        }
-                        if (!state.isLoadingMore && state.hasMorePages) {
-                            item(span = { GridItemSpan(2) }) {
-                                LaunchedEffect(Unit) {
-                                    viewModel.loadNextPage()
-                                }
+                    }
+                    if (!state.isLoadingMore && state.hasMorePages) {
+                        item(span = { GridItemSpan(2) }) {
+                            LaunchedEffect(Unit) {
+                                viewModel.loadNextPage()
                             }
                         }
                     }
-                )
-            }
+                }
+            )
         }
     }
 }

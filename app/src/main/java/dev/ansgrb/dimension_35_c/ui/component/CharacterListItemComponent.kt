@@ -29,6 +29,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -55,7 +56,13 @@ fun CharacterListItemComponent(
             .fillMaxWidth()
             .border(
                 width = 1.dp,
-                brush = Brush.horizontalGradient(listOf(Color.White, Color.Transparent)),
+                brush = Brush.horizontalGradient(
+                    listOf(
+                        MaterialTheme.colorScheme.primary,
+                        MaterialTheme.colorScheme.error,
+                        MaterialTheme.colorScheme.secondary,
+                    )
+                ),
                 shape = RoundedCornerShape(12.dp)
             )
             .clip(RoundedCornerShape(12.dp))
@@ -80,7 +87,7 @@ fun CharacterListItemComponent(
         ) {
             Text(
                 text = dimension34cCharacter.name,
-                color = Color.White,
+                color = MaterialTheme.colorScheme.primary,
                 fontWeight = FontWeight.Bold,
                 fontSize = 20.sp,
                 maxLines = 1,
@@ -91,7 +98,7 @@ fun CharacterListItemComponent(
 
             Text(
                 text = dimension34cCharacter.species,
-                color = Color.White.copy(alpha = 0.7f),
+                color = MaterialTheme.colorScheme.secondary,
                 fontSize = 14.sp
             )
         }

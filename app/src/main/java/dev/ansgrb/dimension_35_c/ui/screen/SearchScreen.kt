@@ -36,21 +36,17 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import dev.ansgrb.dimension_35_c.ui.component.CharacterListItemComponent
-import dev.ansgrb.dimension_35_c.ui.component.Dimension35cToolbarComponent
 import dev.ansgrb.dimension_35_c.ui.component.LoadingSpinnerComponent
 import dev.ansgrb.dimension_35_c.viewmodel.SearchScreenViewModel
 import dev.ansgrb.network.models.domain.Dimension34cCharacter
@@ -70,97 +66,79 @@ fun SearchScreen(
     onCharacterClick: (Int) -> Unit,
 //    onBackClick: () -> Unit,
 //    onSearch: (String) -> Unit,
-//    onSearchClear: () -> Unit,
+//    onSearchClear: () -> Unit, // TODO: Implement a clear button
 //    onSearchFocusChange: (Boolean) -> Unit,
 //    onSearchTextChange: (String) -> Unit,
 ) {
-    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     val searchQuery by viewModel.searchQuery.collectAsState()
     val searchResults by viewModel.searchResults.collectAsState()
     val selectedStatus by viewModel.selectedStatus.collectAsState()
 
-    Scaffold(
-        topBar = {
-            Dimension35cToolbarComponent(
-                title = "Search",
-                showBackButton = false,
-                scrollBehavior = scrollBehavior,
-            )
-        },
-        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection)
-    ) { paddingValues ->
-        Column(
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+    ) {
+        SearchBar(
+            query = searchQuery,
+            onQueryChange = viewModel::onSearchQueryChanged,
             modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-        ) {
-            SearchBar(
-                query = searchQuery,
-                onQueryChange = { query ->
-                    viewModel.onSearchQueryChanged(query)
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
-            )
-            StatusFilterChips(
-                selectedStatus = selectedStatus,
-                onStatusSelected = { status ->
-                    viewModel.onStatusSelected(status)
-                },
-            )
-            when (val state = searchResults) {
-                is SearchState.Initial -> {
-                    EmptyStateMessage(
-                        text = "Start typing to search for characters",
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(16.dp)
-                    )
-                }
-                is SearchState.Loading -> {
-                    LoadingSpinnerComponent()
-                }
-                is SearchState.Loaded -> {
-                    SearchResultCount(
-                        count = state.dimension34cCharacters.size,
-                        query = searchQuery,
-                    )
-                    if (state.dimension34cCharacters.isEmpty()) {
-                        EmptyStateMessage(text = "No results found")
-                    } else {
-                        LazyVerticalGrid(
-                            columns = GridCells.Fixed(1),
-                            contentPadding = PaddingValues(16.dp),
-                            horizontalArrangement = Arrangement.spacedBy(16.dp),
-                            verticalArrangement = Arrangement.spacedBy(16.dp),
-                            modifier = Modifier.fillMaxSize()
-                        ) {
-                            items(
-                                count = state.dimension34cCharacters.size,
-                                key = { index -> state.dimension34cCharacters[index].id },
-                            ) { index ->
-                                val character = state.dimension34cCharacters[index]
-                                CharacterListItemComponent(
-                                    dimension34cCharacter = character,
-                                    modifier = Modifier,
-                                    onClick = { onCharacterClick(character.id) }
-                                )
-                            }
+                .fillMaxWidth()
+                .padding(16.dp)
+        )
+        StatusFilterChips(
+            selectedStatus = selectedStatus,
+            onStatusSelected = viewModel::onStatusSelected,
+            modifier = Modifier
+                .padding(bottom = 8.dp)
+        )
+        when (val state = searchResults) {
+            is SearchState.Initial -> {
+                EmptyStateMessage(
+                    text = "Start typing to search for characters",
+                )
+            }
+            is SearchState.Loading -> {
+                LoadingSpinnerComponent()
+            }
+            is SearchState.Loaded -> {
+                SearchResultCount(
+                    count = state.dimension34cCharacters.size,
+                    query = searchQuery,
+                )
+                if (state.dimension34cCharacters.isEmpty()) {
+                    EmptyStateMessage(text = "No results found")
+                } else {
+                    LazyVerticalGrid(
+                        columns = GridCells.Fixed(1),
+                        contentPadding = PaddingValues(16.dp),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp),
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        items(
+                            count = state.dimension34cCharacters.size,
+                            key = { index -> state.dimension34cCharacters[index].id },
+                        ) { index ->
+                            val character = state.dimension34cCharacters[index]
+                            CharacterListItemComponent(
+                                dimension34cCharacter = character,
+                                modifier = Modifier,
+                                onClick = { onCharacterClick(character.id) }
+                            )
                         }
                     }
                 }
-                is SearchState.Error -> {
-                    EmptyStateMessage(
-                        text = state.message,
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(16.dp)
-                    )
-                }
             }
-
+            is SearchState.Error -> {
+                EmptyStateMessage(
+                    text = state.message,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(16.dp)
+                )
+            }
         }
+
     }
 }
 
@@ -272,4 +250,19 @@ private fun StatusFilterChips(
             label = { Text("Unknown") }
         )
     }
+}
+
+@Composable
+private fun SearchResultList(
+    characters: List<Dimension34cCharacter>,
+    searchQuery: String,
+    onCharacterClick: (Int) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    if (characters.isEmpty() && searchQuery.isNotEmpty()) {
+        EmptyStateMessage(text = "No results found")
+        return
+    }
+    // TODO: Implement a list of characters
+    // I'm tired boss :(
 }

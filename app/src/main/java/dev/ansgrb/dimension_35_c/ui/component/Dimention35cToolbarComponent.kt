@@ -49,7 +49,7 @@ fun Dimension35cToolbarComponent(
         Icon(
             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
             contentDescription = stringResource(R.string.navigate_back),
-            tint = MaterialTheme.colorScheme.onPrimary
+            tint = MaterialTheme.colorScheme.primary,
         )
     },
     actions: @Composable RowScope.() -> Unit = {},

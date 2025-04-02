@@ -44,7 +44,7 @@ fun TheScreenSeasonHeaderComponent(
     ) {
         Text(
             text = "Season $seasonNumber",
-            color = Color.White,
+            color = MaterialTheme.colorScheme.primary,
             fontSize = 32.sp,
             lineHeight = 32.sp,
             textAlign = TextAlign.Center,
@@ -52,7 +52,7 @@ fun TheScreenSeasonHeaderComponent(
                 .fillMaxWidth()
                 .border(
                     width = 1.dp,
-                    color = Color.White,
+                    color = MaterialTheme.colorScheme.primary,
                     shape = RoundedCornerShape(8.dp)
                 )
                 .padding(vertical = 4.dp)

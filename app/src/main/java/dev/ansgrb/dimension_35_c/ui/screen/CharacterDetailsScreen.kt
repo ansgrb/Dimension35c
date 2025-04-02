@@ -27,6 +27,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
@@ -113,23 +115,17 @@ fun CharacterDetailsScreen(
                     }
                     item { Spacer(modifier = Modifier.height(64.dp)) }
                     item {
-                        Text(
-                            text = "View all episodes",
-                            color = Color.Cyan,
-                            fontSize = 18.sp,
-                            textAlign = TextAlign.Center,
+                        OutlinedButton(
+                            onClick = { onNavigateToEpisodes(characterId) },
                             modifier = Modifier
-                                .padding(horizontal = 32.dp, vertical = 8.dp)
-                                .border(
-                                    width = 1.dp,
-                                    color = Color.Cyan,
-                                    shape = RoundedCornerShape(8.dp)
-                                )
-                                .clip(RoundedCornerShape(12.dp))
-                                .clickable {
-                                    onNavigateToEpisodes(characterId)
-                                }
-                        )
+                                .padding(horizontal = 32.dp)
+                        ) {
+                            Text(
+                                text = "View all episodes",
+                                fontSize = 18.sp,
+                                textAlign = TextAlign.Center
+                            )
+                        }
                     }
                     item { Spacer(modifier = Modifier.height(64.dp)) }
                 }

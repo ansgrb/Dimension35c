@@ -21,6 +21,7 @@ import dev.ansgrb.network.KtorClient
 import dev.ansgrb.network.models.domain.Dimension34cCharacter
 import dev.ansgrb.network.models.domain.CharacterFilter
 import dev.ansgrb.network.models.domain.CharacterPage
+import dev.ansgrb.network.models.domain.Episode
 import javax.inject.Inject
 
 class CharacterRepository @Inject constructor(private val ktorClient: KtorClient) {
@@ -32,12 +33,8 @@ class CharacterRepository @Inject constructor(private val ktorClient: KtorClient
         return ktorClient.getCharacter(characterId)
     }
 
-    suspend fun fetchCharacters(query: String): ApiOps<CharacterPage> {
-        return ktorClient.searchCharacters(name = query)
-    }
-
-    suspend fun searchCharacters(query: String): ApiOps<CharacterPage> {
-        return ktorClient.searchCharacters(query)
+    suspend fun fetchEpisodes(episodeIds: List<Int>): ApiOps<List<Episode>> {
+        return ktorClient.getEpisodes(episodeIds)
     }
 
     suspend fun searchCharacters(filter: CharacterFilter): ApiOps<CharacterPage> {

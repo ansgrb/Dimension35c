@@ -31,12 +31,10 @@ import dev.ansgrb.dimension_35_c.ui.screen.CharacterEpisodeScreen
 import dev.ansgrb.dimension_35_c.ui.screen.ForAllEpisodesScreen
 import dev.ansgrb.dimension_35_c.ui.screen.MainScreen
 import dev.ansgrb.dimension_35_c.ui.screen.SearchScreen
-import dev.ansgrb.network.KtorClient
 
 @Composable
 fun Dimension35cNavHost(
     navController: NavHostController,
-    ktorClient: KtorClient,
     modifier: Modifier = Modifier
 ) {
     NavHost(
@@ -95,8 +93,7 @@ fun Dimension35cNavHost(
             )
         ) { entry ->
             CharacterEpisodeScreen(
-                characterId = entry.arguments?.getInt("characterId") ?: return@composable,
-                ktorClient = ktorClient,
+                characterId = entry.arguments?.getInt("characterId") ?: return@composable
             )
         }
     }

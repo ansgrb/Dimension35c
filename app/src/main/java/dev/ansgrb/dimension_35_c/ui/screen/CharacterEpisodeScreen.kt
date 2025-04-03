@@ -17,8 +17,10 @@
 package dev.ansgrb.dimension_35_c.ui.screen
 
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -33,9 +35,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.text.style.TextAlign
+import androidx.hilt.navigation.compose.hiltViewModel
 import dev.ansgrb.dimension_35_c.ui.component.CharacterNameComponent
 import dev.ansgrb.dimension_35_c.ui.component.Dimension35cToolbarComponent
 import dev.ansgrb.dimension_35_c.ui.component.EpisodeRowComponent
@@ -47,37 +55,35 @@ import dev.ansgrb.network.KtorClient
 import dev.ansgrb.network.models.domain.Dimension34cCharacter
 import dev.ansgrb.network.models.domain.Episode
 import dev.ansgrb.dimension_35_c.ui.component.TheScreenSeasonHeaderComponent
+import dev.ansgrb.dimension_35_c.viewmodel.CharacterEpisodeViewModel
+import dev.ansgrb.dimension_35_c.viewmodel.CharacterEpisodeViewState
 import kotlinx.coroutines.launch
 
 @Composable
 fun CharacterEpisodeScreen(
     characterId: Int,
-    ktorClient: KtorClient
-    ) {
-    var dimension34cCharacterState by remember { mutableStateOf<Dimension34cCharacter?>(null) }
-    var episodesState by remember { mutableStateOf<List<Episode>>(emptyList()) }
+    viewModel: CharacterEpisodeViewModel = hiltViewModel(),
+) {
+    val viewState by viewModel.viewState.collectAsState()
 
     LaunchedEffect(Unit) {
-        ktorClient.getCharacter(characterId).onMade { character ->
-            dimension34cCharacterState = character
-            launch {
-                ktorClient.getEpisodes(character.episodeIds).onMade { episodes ->
-                    episodesState = episodes
-                }.onFailed { error ->
-                    // TODO: Handle error state
-                }
-            }
-        }.onFailed { error ->
-            // TODO: Handle error state
-        }
+        viewModel.fetchCharacterWithEpisodes(characterId)
     }
 
-    dimension34cCharacterState?.let { character ->
-        CharacterEpisodesContent(
-            dimension34cCharacter = character,
-            episodes = episodesState
-        )
-    } ?: LoadingSpinnerComponent()
+    when (val state = viewState) {
+        is CharacterEpisodeViewState.Loading -> {
+            LoadingSpinnerComponent()
+        }
+        is CharacterEpisodeViewState.Error -> {
+            EmptyStateMessage(text = state.message)
+        }
+        is CharacterEpisodeViewState.Loaded -> {
+            CharacterEpisodesContent(
+                dimension34cCharacter = state.character,
+                episodes = state.episodes
+            )
+        }
+    }
 }
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -94,11 +100,9 @@ private fun CharacterEpisodesContent(
         item {
             CharacterNameComponent(characterName = dimension34cCharacter.name)
         }
-
         item {
             Spacer(modifier = Modifier.height(8.dp))
         }
-
         item {
             LazyRow {
                 groupedEpisodes.forEach { (seasonNumber, seasonEpisodes) ->
@@ -114,19 +118,15 @@ private fun CharacterEpisodesContent(
                 }
             }
         }
-
         item {
             Spacer(modifier = Modifier.height(16.dp))
         }
-
         item {
             ImageComponent(imageUrl = dimension34cCharacter.imageUrl)
         }
-
         item {
             Spacer(modifier = Modifier.height(32.dp))
         }
-
         groupedEpisodes.forEach { (seasonNumber, seasonEpisodes) ->
             stickyHeader {
                 TheScreenSeasonHeaderComponent(seasonNumber = seasonNumber)
@@ -135,7 +135,6 @@ private fun CharacterEpisodesContent(
             item {
                 Spacer(modifier = Modifier.height(16.dp))
             }
-
             items(
                 items = seasonEpisodes,
                 key = { it.id }
@@ -143,5 +142,23 @@ private fun CharacterEpisodesContent(
                 EpisodeRowComponent(episode = episode)
             }
         }
+    }
+}
+
+@Composable
+private fun EmptyStateMessage(
+    text: String,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = modifier.fillMaxSize()
+    ) {
+        Text(
+            text = text,
+            style = MaterialTheme.typography.bodyLarge,
+            textAlign = TextAlign.Center,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
     }
 }

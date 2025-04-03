@@ -26,12 +26,9 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import dev.ansgrb.dimension_35_c.ui.component.AdaptiveScaffold
 import dev.ansgrb.dimension_35_c.ui.navigation.Dimension35cNavHost
-import dev.ansgrb.network.KtorClient
 
 @Composable
-fun AppContent(
-    ktorClient: KtorClient
-) {
+fun AppContent() {
     val navController = rememberNavController()
     val currentBackStackEntry = navController.currentBackStackEntryAsState()
     val currentRoute = currentBackStackEntry.value?.destination?.route
@@ -46,7 +43,6 @@ fun AppContent(
         ) { innerPadding ->
             Dimension35cNavHost(
                 navController = navController,
-                ktorClient = ktorClient,
                 modifier = Modifier.padding(innerPadding)
             )
         }

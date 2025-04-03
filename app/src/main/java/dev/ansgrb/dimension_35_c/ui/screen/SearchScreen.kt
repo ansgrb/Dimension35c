@@ -48,15 +48,9 @@ import dev.ansgrb.dimension_35_c.ui.component.CharacterListItemComponent
 import dev.ansgrb.dimension_35_c.ui.component.EmptyStateMessageComponent
 import dev.ansgrb.dimension_35_c.ui.component.LoadingSpinnerComponent
 import dev.ansgrb.dimension_35_c.viewmodel.SearchScreenViewModel
+import dev.ansgrb.dimension_35_c.viewmodel.SearchState
 import dev.ansgrb.network.models.domain.Dimension34cCharacter
 import dev.ansgrb.network.models.domain.CharacterStatus
-
-sealed interface SearchState {
-    object Initial : SearchState
-    object Loading : SearchState
-    data class Loaded(val dimension34cCharacters: List<Dimension34cCharacter>) : SearchState
-    data class Error(val message: String) : SearchState
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

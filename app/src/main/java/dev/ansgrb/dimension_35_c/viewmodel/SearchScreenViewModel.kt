@@ -20,7 +20,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.ansgrb.dimension_35_c.data.repository.CharacterRepository
-import dev.ansgrb.dimension_35_c.ui.screen.SearchState
 import dev.ansgrb.network.ApiOps
 import dev.ansgrb.network.models.domain.CharacterFilter
 import dev.ansgrb.network.models.domain.CharacterStatus
@@ -101,4 +100,11 @@ class SearchScreenViewModel @Inject constructor(
             }
         }
     }
+}
+
+sealed interface SearchState {
+    object Initial : SearchState
+    object Loading : SearchState
+    data class Loaded(val dimension34cCharacters: List<Dimension34cCharacter>) : SearchState
+    data class Error(val message: String) : SearchState
 }

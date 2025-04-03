@@ -21,7 +21,7 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.ansgrb.dimension_35_c.data.repository.CharacterRepository
 import dev.ansgrb.dimension_35_c.ui.component.KeyFigure
-import dev.ansgrb.dimension_35_c.ui.screen.CharacterDetailsViewState
+import dev.ansgrb.network.models.domain.Dimension34cCharacter
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -67,3 +67,11 @@ class CharacterDetailsViewModel @Inject constructor(
     }
 }
 
+sealed interface CharacterDetailsViewState {
+    object Loading : CharacterDetailsViewState
+    data class Loaded(
+        val dimension34cCharacter: Dimension34cCharacter,
+        val characterKeyFigures: List<KeyFigure>
+    ) : CharacterDetailsViewState
+    data class Error(val message: String) : CharacterDetailsViewState
+}

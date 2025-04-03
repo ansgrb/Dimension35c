@@ -20,7 +20,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.ansgrb.dimension_35_c.data.repository.EpisodesRepository
-import dev.ansgrb.dimension_35_c.ui.screen.ForAllEpisodesScreenViewState
+import dev.ansgrb.network.models.domain.Episode
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -51,3 +51,10 @@ class ForAllEpisodesScreenViewModel @Inject constructor(
     }
 }
 
+sealed interface ForAllEpisodesScreenViewState {
+    object Loading : ForAllEpisodesScreenViewState
+    data class Loaded(
+        val data: Map<String, List<Episode>>
+    ) : ForAllEpisodesScreenViewState
+    data class Error(val message: String) : ForAllEpisodesScreenViewState
+}

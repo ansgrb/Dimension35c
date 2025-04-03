@@ -37,17 +37,7 @@ import kotlinx.coroutines.launch
 import dev.ansgrb.dimension_35_c.ui.component.CharacterGridItemComponent
 import dev.ansgrb.dimension_35_c.ui.component.LoadingSpinnerComponent
 import dev.ansgrb.dimension_35_c.viewmodel.MainViewModel
-import dev.ansgrb.network.models.domain.Dimension34cCharacter
-
-sealed interface MainViewState {
-    object Loading : MainViewState
-    data class GridLoaded(
-        val dimension34cCharacters: List<Dimension34cCharacter> = emptyList(),
-        val isLoadingMore: Boolean = false,
-        val currentPage: Int = 1,
-        val hasMorePages: Boolean = true
-    ) : MainViewState
-}
+import dev.ansgrb.dimension_35_c.viewmodel.MainViewState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

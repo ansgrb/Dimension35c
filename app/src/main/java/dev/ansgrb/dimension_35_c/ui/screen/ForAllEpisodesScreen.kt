@@ -44,15 +44,8 @@ import dev.ansgrb.dimension_35_c.ui.component.EmptyStateMessageComponent
 import dev.ansgrb.dimension_35_c.ui.component.EpisodeRowComponent
 import dev.ansgrb.dimension_35_c.ui.component.LoadingSpinnerComponent
 import dev.ansgrb.dimension_35_c.viewmodel.ForAllEpisodesScreenViewModel
+import dev.ansgrb.dimension_35_c.viewmodel.ForAllEpisodesScreenViewState
 import dev.ansgrb.network.models.domain.Episode
-
-sealed interface ForAllEpisodesScreenViewState {
-    object Loading : ForAllEpisodesScreenViewState
-    data class Loaded(
-        val data: Map<String, List<Episode>>
-    ) : ForAllEpisodesScreenViewState
-    data class Error(val message: String) : ForAllEpisodesScreenViewState
-}
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable

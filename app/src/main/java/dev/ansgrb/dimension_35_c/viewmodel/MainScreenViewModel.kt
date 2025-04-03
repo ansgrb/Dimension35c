@@ -20,7 +20,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.ansgrb.dimension_35_c.data.repository.CharacterRepository
-import dev.ansgrb.dimension_35_c.ui.screen.MainViewState
+import dev.ansgrb.network.models.domain.Dimension34cCharacter
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -74,6 +74,15 @@ class MainViewModel @Inject constructor(
             }
         }
     }
+}
 
+sealed interface MainViewState {
+    object Loading : MainViewState
+    data class GridLoaded(
+        val dimension34cCharacters: List<Dimension34cCharacter> = emptyList(),
+        val isLoadingMore: Boolean = false,
+        val currentPage: Int = 1,
+        val hasMorePages: Boolean = true
+    ) : MainViewState
 }
 

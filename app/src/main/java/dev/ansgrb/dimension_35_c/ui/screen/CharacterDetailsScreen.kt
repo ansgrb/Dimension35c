@@ -42,16 +42,8 @@ import dev.ansgrb.dimension_35_c.ui.component.LoadingSpinnerComponent
 import dev.ansgrb.dimension_35_c.ui.component.KeyFigure
 import dev.ansgrb.dimension_35_c.ui.component.KeyFigureComponent
 import dev.ansgrb.dimension_35_c.viewmodel.CharacterDetailsViewModel
+import dev.ansgrb.dimension_35_c.viewmodel.CharacterDetailsViewState
 import dev.ansgrb.network.models.domain.Dimension34cCharacter
-
-sealed interface CharacterDetailsViewState {
-    object Loading : CharacterDetailsViewState
-    data class Loaded(
-        val dimension34cCharacter: Dimension34cCharacter,
-        val characterKeyFigures: List<KeyFigure>
-    ) : CharacterDetailsViewState
-    data class Error(val message: String) : CharacterDetailsViewState
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

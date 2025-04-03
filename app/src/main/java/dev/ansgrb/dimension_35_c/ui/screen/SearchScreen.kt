@@ -41,12 +41,11 @@ import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import dev.ansgrb.dimension_35_c.ui.component.CharacterListItemComponent
+import dev.ansgrb.dimension_35_c.ui.component.EmptyStateMessageComponent
 import dev.ansgrb.dimension_35_c.ui.component.LoadingSpinnerComponent
 import dev.ansgrb.dimension_35_c.viewmodel.SearchScreenViewModel
 import dev.ansgrb.network.models.domain.Dimension34cCharacter
@@ -93,7 +92,7 @@ fun SearchScreen(
         )
         when (val state = searchResults) {
             is SearchState.Initial -> {
-                EmptyStateMessage(
+                EmptyStateMessageComponent(
                     text = "Start typing to search for characters",
                 )
             }
@@ -108,7 +107,7 @@ fun SearchScreen(
                 )
             }
             is SearchState.Error -> {
-                EmptyStateMessage(
+                EmptyStateMessageComponent(
                     text = state.message
                 )
             }
@@ -133,24 +132,6 @@ private fun SearchBar(
         shape = RoundedCornerShape(8.dp),
         modifier = modifier
     )
-}
-
-@Composable
-private fun EmptyStateMessage(
-    text: String,
-    modifier: Modifier = Modifier
-) {
-    Box(
-        contentAlignment = Alignment.Center,
-        modifier = modifier.fillMaxSize()
-    ) {
-        Text(
-            text = text,
-            style = MaterialTheme.typography.bodyLarge,
-            textAlign = TextAlign.Center,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-    }
 }
 
 @Composable
@@ -195,7 +176,7 @@ private fun SearchResultList(
     modifier: Modifier = Modifier
 ) {
     if (characters.isEmpty() && searchQuery.isNotEmpty()) {
-        EmptyStateMessage(text = "No results found")
+        EmptyStateMessageComponent(text = "No results found")
         return
     }
 

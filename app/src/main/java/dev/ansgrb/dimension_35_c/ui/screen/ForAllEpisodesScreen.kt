@@ -20,9 +20,11 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -37,17 +39,20 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import dev.ansgrb.dimension_35_c.ui.component.Dimension35cToolbarComponent
 import dev.ansgrb.dimension_35_c.ui.component.EpisodeRowComponent
 import dev.ansgrb.dimension_35_c.ui.component.LoadingSpinnerComponent
+import dev.ansgrb.dimension_35_c.ui.screen.SeasonHeader
 import dev.ansgrb.dimension_35_c.viewmodel.ForAllEpisodesScreenViewModel
 import dev.ansgrb.network.models.domain.Episode
 
@@ -65,7 +70,6 @@ fun ForAllEpisodesScreen(
     forAllEpisodesViewModel: ForAllEpisodesScreenViewModel = hiltViewModel()
 ) {
     val viewState by forAllEpisodesViewModel.viewState.collectAsState()
-    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 
     LaunchedEffect(Unit) {
         forAllEpisodesViewModel.fetchForAllEpisodes()
@@ -76,70 +80,73 @@ fun ForAllEpisodesScreen(
             LoadingSpinnerComponent()
         }
         is ForAllEpisodesScreenViewState.Loaded -> {
-            Scaffold(
-                topBar = {
-                    Dimension35cToolbarComponent(
-                        title = "All Episodes",
-                        scrollBehavior = scrollBehavior
-                    )
-                },
-                modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection)
-            ) { paddingValues ->
-                LazyColumn(
-                    contentPadding = PaddingValues(
-                        top = paddingValues.calculateTopPadding() + 16.dp,
-                        start = 16.dp,
-                        end = 16.dp,
-                        bottom = 16.dp
-                    ),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    (viewState as ForAllEpisodesScreenViewState.Loaded).data.forEach { mapEntry ->
-                        stickyHeader(key = mapEntry.key) {
-                            Header(
-                                seasonName = mapEntry.key,
-                                uniqueCharacterCount = mapEntry.value.flatMap { it.characterById }.distinct().size
-                            )
-                        }
-                        mapEntry.value.forEach { episode ->
-                            item(key = episode.id) {
-                                EpisodeRowComponent(episode = episode)
-                            }
-                        }
-                    }
-                }
-            }
+            EpisodesContent(
+                episodes = (viewState as ForAllEpisodesScreenViewState.Loaded).data,
+            )
+
         }
         is ForAllEpisodesScreenViewState.Error -> {
-            // TODO: Show error
+            EmptyStateMessage(
+                text = (viewState as ForAllEpisodesScreenViewState.Error).message,
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun EpisodesContent(
+    episodes: Map<String, List<Episode>>,
+    modifier: Modifier = Modifier
+) {
+    LazyColumn(
+        contentPadding = PaddingValues(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+        modifier = modifier
+    ) {
+        episodes.forEach { (seasonName, seasonEpisodes) ->
+            stickyHeader(key = seasonName) {
+                SeasonHeader(
+                    seasonName = seasonName,
+                    uniqueCharacterCount = seasonEpisodes.flatMap { it.characterById }.distinct().size
+                )
+            }
+            items(
+                count = seasonEpisodes.size,
+                key = { seasonEpisodes[it].id }
+            ) { index ->
+                EpisodeRowComponent(episode = seasonEpisodes[index])
+            }
         }
     }
 }
 
 @Composable
-private fun Header(seasonName: String, uniqueCharacterCount: Int) {
+private fun SeasonHeader(
+    seasonName: String,
+    uniqueCharacterCount: Int,
+    modifier: Modifier = Modifier
+) {
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
-            .background(color = MaterialTheme.colorScheme.surface)
-//            .border(
-//                width = 1.dp,
-//                color = Color.White,
-//                shape = RoundedCornerShape(8.dp)
-//            )
-//            .padding(top = 8.dp, bottom = 16.dp, start = 16.dp)
+            .background(MaterialTheme.colorScheme.surface)
     ) {
         Text(
             text = seasonName,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.primary,
-            fontSize = 25.sp
+            style = MaterialTheme.typography.titleLarge.copy(
+                fontWeight = FontWeight.Bold,
+                fontSize = 25.sp
+            ),
+            color = MaterialTheme.colorScheme.primary
         )
         Text(
             text = "$uniqueCharacterCount unique characters",
-            color = MaterialTheme.colorScheme.primary,
-            fontStyle = FontStyle.Italic,
-            fontSize = 18.sp
+            style = MaterialTheme.typography.bodyLarge.copy(
+                fontStyle = FontStyle.Italic,
+                fontSize = 18.sp
+            ),
+            color = MaterialTheme.colorScheme.primary
         )
         Spacer(
             modifier = Modifier
@@ -150,6 +157,24 @@ private fun Header(seasonName: String, uniqueCharacterCount: Int) {
                     color = MaterialTheme.colorScheme.primary,
                     shape = RoundedCornerShape(2.dp)
                 )
+        )
+    }
+}
+
+@Composable
+private fun EmptyStateMessage(
+    text: String,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = modifier.fillMaxSize()
+    ) {
+        Text(
+            text = text,
+            style = MaterialTheme.typography.bodyLarge,
+            textAlign = TextAlign.Center,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
 }

@@ -84,9 +84,6 @@ fun Dimension35cNavHost(
                 characterId = entry.arguments?.getInt("characterId") ?: return@composable,
                 onNavigateToEpisodes = { characterId ->
                     navController.navigate("characterEpisodes/$characterId")
-                },
-                onBackButtonClicked = {
-                    navController.popBackStack()
                 }
             )
         }

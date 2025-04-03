@@ -18,6 +18,7 @@ package dev.ansgrb.dimension_35_c.ui.screen
 
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -36,6 +37,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -68,71 +70,97 @@ fun CharacterDetailsScreen(
     characterId: Int,
     viewModel: CharacterDetailsViewModel = hiltViewModel(),
     onNavigateToEpisodes: (Int) -> Unit,
-    onBackButtonClicked: () -> Unit
     ) {
-    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
-    Scaffold(
-        topBar = {
-            Dimension35cToolbarComponent(
-                title = "Character Details",
-                showBackButton = true,
-                onBackButtonClicked = onBackButtonClicked,
-                scrollBehavior = scrollBehavior
+    val state by viewModel.stateFlow.collectAsState()
+
+    LaunchedEffect(Unit) {
+        viewModel.fetchCharacter(characterId)
+    }
+
+    when (val viewState = state) {
+        is CharacterDetailsViewState.Loading -> {
+            LoadingSpinnerComponent()
+        }
+        is CharacterDetailsViewState.Loaded -> {
+            CharacterContent(
+                character = viewState.dimension34cCharacter,
+                keyFigures = viewState.characterKeyFigures,
+                onViewEpisodesClick = { onNavigateToEpisodes(characterId) }
             )
-        },
-        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection)
-    ) { paddingValues ->
-        LaunchedEffect(key1 = Unit, block = {
-            viewModel.fetchCharacter(characterId)
-        })
-        val state by viewModel.stateFlow.collectAsState()
-        LazyColumn(
-            contentPadding = PaddingValues(
-                top = paddingValues.calculateTopPadding() + 16.dp,
-                start = 16.dp,
-                end = 16.dp,
-                bottom = 16.dp
-            ),
-            modifier = Modifier.fillMaxSize()
-        ) {
-            when (val viewState = state) {
-                is CharacterDetailsViewState.Error -> TODO()
-                is CharacterDetailsViewState.Loaded -> {
-                    val character = viewState.dimension34cCharacter
-                    item {
-                        CharacterNamePlateComponent(
-                            name = character.name,
-                            status = character.status
-                        )
-                    }
-                    item { Spacer(modifier = Modifier.height(8.dp)) }
-                    item { ImageComponent(imageUrl = character.imageUrl) }
-                    items(viewState.characterKeyFigures) {
-                        KeyFigureComponent(keyFigure = it)
-                        if (it != viewState.characterKeyFigures.last()) {
-                            Spacer(modifier = Modifier.height(32.dp))
-                        }
-                    }
-                    item { Spacer(modifier = Modifier.height(64.dp)) }
-                    item {
-                        OutlinedButton(
-                            onClick = { onNavigateToEpisodes(characterId) },
-                            modifier = Modifier
-                                .padding(horizontal = 32.dp)
-                        ) {
-                            Text(
-                                text = "View all episodes",
-                                fontSize = 18.sp,
-                                textAlign = TextAlign.Center
-                            )
-                        }
-                    }
-                    item { Spacer(modifier = Modifier.height(64.dp)) }
-                }
-                CharacterDetailsViewState.Loading -> {
-                    item { LoadingSpinnerComponent() }
-                }
+        }
+        is CharacterDetailsViewState.Error -> {
+            EmptyStateMessage(text = viewState.message)
+        }
+    }
+}
+
+@Composable
+private fun CharacterContent(
+    character: Dimension34cCharacter,
+    keyFigures: List<KeyFigure>,
+    onViewEpisodesClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    LazyColumn(
+        contentPadding = PaddingValues(16.dp),
+        modifier = modifier.fillMaxSize()
+    ) {
+        item {
+            CharacterNamePlateComponent(
+                name = character.name,
+                status = character.status
+            )
+        }
+        item {
+            Spacer(modifier = Modifier.height(8.dp))
+        }
+        item {
+            ImageComponent(imageUrl = character.imageUrl)
+        }
+        items(
+            items = keyFigures,
+            key = { it.title }
+        ) { keyFigure ->
+            KeyFigureComponent(keyFigure = keyFigure)
+            if (keyFigure != keyFigures.last()) {
+                Spacer(modifier = Modifier.height(32.dp))
             }
         }
+        item {
+            Spacer(modifier = Modifier.height(64.dp))
+        }
+        item {
+            OutlinedButton(
+                onClick = onViewEpisodesClick,
+                modifier = Modifier.padding(horizontal = 32.dp)
+            ) {
+                Text(
+                    text = "View all episodes",
+                    fontSize = 18.sp,
+                    textAlign = TextAlign.Center
+                )
+            }
+        }
+        item {
+            Spacer(modifier = Modifier.height(64.dp))
+        }
+    }
+}
+
+@Composable
+private fun EmptyStateMessage(
+    text: String,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = modifier.fillMaxSize()
+    ) {
+        Text(
+            text = text,
+            style = MaterialTheme.typography.bodyLarge,
+            textAlign = TextAlign.Center,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
     }
 }

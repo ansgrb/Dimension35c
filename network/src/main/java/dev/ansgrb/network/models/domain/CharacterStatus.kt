@@ -22,4 +22,11 @@ sealed class CharacterStatus(val displayName: String, val color: Color) {
     object Alive: CharacterStatus("Alive", Color.Green)
     object Dead: CharacterStatus("Dead", Color.Red)
     object Unknown: CharacterStatus("Unknown", Color.Blue)
+
+    // return a list of all statuses
+    companion object {
+        fun getAllStatuses(): List<CharacterStatus> {
+            return listOf(Alive, Dead, Unknown)
+        }
+    }
 }

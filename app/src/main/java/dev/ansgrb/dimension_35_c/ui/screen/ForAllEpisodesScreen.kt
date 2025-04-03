@@ -21,19 +21,25 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -59,18 +65,15 @@ fun ForAllEpisodesScreen(
     }
 
     when (viewState) {
-        is ForAllEpisodesScreenViewState.Loading -> {
-            LoadingSpinnerComponent()
-        }
+        is ForAllEpisodesScreenViewState.Loading -> LoadingSpinnerComponent()
         is ForAllEpisodesScreenViewState.Loaded -> {
             EpisodesContent(
-                episodes = (viewState as ForAllEpisodesScreenViewState.Loaded).data,
+                episodes = (viewState as ForAllEpisodesScreenViewState.Loaded).data
             )
-
         }
         is ForAllEpisodesScreenViewState.Error -> {
             EmptyStateMessageComponent(
-                text = (viewState as ForAllEpisodesScreenViewState.Error).message,
+                text = (viewState as ForAllEpisodesScreenViewState.Error).message
             )
         }
     }
@@ -84,9 +87,33 @@ private fun EpisodesContent(
 ) {
     LazyColumn(
         contentPadding = PaddingValues(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-        modifier = modifier
+        modifier = modifier.fillMaxSize()
     ) {
+        item {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp)
+                ) {
+                    Text(
+                        text = "All Episodes",
+                        style = MaterialTheme.typography.headlineMedium,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = "${episodes.values.flatten().size} episodes across ${episodes.size} seasons",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+        }
+
+        item { Spacer(modifier = Modifier.height(24.dp)) }
+
         episodes.forEach { (seasonName, seasonEpisodes) ->
             stickyHeader(key = seasonName) {
                 SeasonHeader(
@@ -94,12 +121,18 @@ private fun EpisodesContent(
                     uniqueCharacterCount = seasonEpisodes.flatMap { it.characterById }.distinct().size
                 )
             }
+
             items(
                 count = seasonEpisodes.size,
                 key = { seasonEpisodes[it].id }
             ) { index ->
-                EpisodeRowComponent(episode = seasonEpisodes[index])
+                EpisodeListItem(episode = seasonEpisodes[index])
+                if (index < seasonEpisodes.size - 1) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
             }
+
+            item { Spacer(modifier = Modifier.height(16.dp)) }
         }
     }
 }
@@ -110,36 +143,73 @@ private fun SeasonHeader(
     uniqueCharacterCount: Int,
     modifier: Modifier = Modifier
 ) {
-    Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.surface)
+    Surface(
+        modifier = modifier.fillMaxWidth(),
+        color = MaterialTheme.colorScheme.surface
     ) {
-        Text(
-            text = seasonName,
-            style = MaterialTheme.typography.titleLarge.copy(
-                fontWeight = FontWeight.Bold,
-                fontSize = 25.sp
-            ),
-            color = MaterialTheme.colorScheme.primary
-        )
-        Text(
-            text = "$uniqueCharacterCount unique characters",
-            style = MaterialTheme.typography.bodyLarge.copy(
-                fontStyle = FontStyle.Italic,
-                fontSize = 18.sp
-            ),
-            color = MaterialTheme.colorScheme.primary
-        )
-        Spacer(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 4.dp)
-                .height(4.dp)
-                .background(
-                    color = MaterialTheme.colorScheme.primary,
-                    shape = RoundedCornerShape(2.dp)
+        Column(modifier = Modifier.padding(bottom = 8.dp)) {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant
                 )
-        )
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(
+                        text = seasonName,
+                        style = MaterialTheme.typography.titleLarge,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    Text(
+                        text = "$uniqueCharacterCount unique characters",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun EpisodeListItem(
+    episode: Episode,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Surface(
+                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+                    shape = RoundedCornerShape(16.dp)
+                ) {
+                    Text(
+                        text = "Episode ${episode.episodeNumber}",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)
+                    )
+                }
+                Text(
+                    text = episode.airDate,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = episode.name,
+                style = MaterialTheme.typography.bodyLarge
+            )
+        }
     }
 }

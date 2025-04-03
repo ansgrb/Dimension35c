@@ -101,40 +101,15 @@ fun SearchScreen(
                 LoadingSpinnerComponent()
             }
             is SearchState.Loaded -> {
-                SearchResultCount(
-                    count = state.dimension34cCharacters.size,
-                    query = searchQuery,
+                SearchResultList(
+                    characters = state.dimension34cCharacters,
+                    searchQuery = searchQuery,
+                    onCharacterClick = onCharacterClick
                 )
-                if (state.dimension34cCharacters.isEmpty()) {
-                    EmptyStateMessage(text = "No results found")
-                } else {
-                    LazyVerticalGrid(
-                        columns = GridCells.Fixed(1),
-                        contentPadding = PaddingValues(16.dp),
-                        horizontalArrangement = Arrangement.spacedBy(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(16.dp),
-                        modifier = Modifier.fillMaxSize()
-                    ) {
-                        items(
-                            count = state.dimension34cCharacters.size,
-                            key = { index -> state.dimension34cCharacters[index].id },
-                        ) { index ->
-                            val character = state.dimension34cCharacters[index]
-                            CharacterListItemComponent(
-                                dimension34cCharacter = character,
-                                modifier = Modifier,
-                                onClick = { onCharacterClick(character.id) }
-                            )
-                        }
-                    }
-                }
             }
             is SearchState.Error -> {
                 EmptyStateMessage(
-                    text = state.message,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(16.dp)
+                    text = state.message
                 )
             }
         }
@@ -179,76 +154,36 @@ private fun EmptyStateMessage(
 }
 
 @Composable
-private fun SearchResultCount(
-    count: Int,
-    query: String,
-    modifier: Modifier = Modifier
-) {
-    if (query.isNotEmpty()) {
-        Text(
-            text = "$count result${if (count != 1) "s" else ""} found",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp)
-        )
-    }
-}
-
-@Composable
 private fun StatusFilterChips(
     selectedStatus: CharacterStatus?,
     onStatusSelected: (CharacterStatus?) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Row(
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         FilterChip(
             selected = selectedStatus == null,
             onClick = { onStatusSelected(null) },
             label = { Text("All") }
         )
-        FilterChip(
-            selected = selectedStatus == CharacterStatus.Alive,
-            onClick = { onStatusSelected(CharacterStatus.Alive) },
-            leadingIcon = {
-                Box(
-                    modifier = Modifier
-                        .size(8.dp)
-                        .background(CharacterStatus.Alive.color, CircleShape)
-                )
-            },
-            label = { Text("Alive") }
-        )
-        FilterChip(
-            selected = selectedStatus == CharacterStatus.Dead,
-            onClick = { onStatusSelected(CharacterStatus.Dead) },
-            leadingIcon = {
-                Box(
-                    modifier = Modifier
-                        .size(8.dp)
-                        .background(CharacterStatus.Dead.color, CircleShape)
-                )
-            },
-            label = { Text("Dead") }
-        )
-        FilterChip(
-            selected = selectedStatus == CharacterStatus.Unknown,
-            onClick = { onStatusSelected(CharacterStatus.Unknown) },
-            leadingIcon = {
-                Box(
-                    modifier = Modifier
-                        .size(8.dp)
-                        .background(CharacterStatus.Unknown.color, CircleShape)
-                )
-            },
-            label = { Text("Unknown") }
-        )
+        listOf(CharacterStatus.Alive, CharacterStatus.Dead, CharacterStatus.Unknown).forEach { status ->
+            FilterChip(
+                selected = selectedStatus == status,
+                onClick = { onStatusSelected(status) },
+                leadingIcon = {
+                    Box(
+                        modifier = Modifier
+                            .size(8.dp)
+                            .background(status.color, CircleShape)
+                    )
+                },
+                label = { Text(status.displayName) }
+            )
+        }
     }
 }
 
@@ -263,6 +198,37 @@ private fun SearchResultList(
         EmptyStateMessage(text = "No results found")
         return
     }
-    // TODO: Implement a list of characters
-    // I'm tired boss :(
+
+    Column(
+        modifier = modifier
+    ) {
+        if (searchQuery.isNotEmpty()) {
+            Text(
+                text = "${characters.size} result${if (characters.size != 1) "s" else ""} found",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier
+                    .padding(horizontal = 16.dp)
+            )
+        }
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(1),
+            contentPadding = PaddingValues(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            modifier = Modifier
+                .fillMaxSize()
+        ) {
+            items(
+                count = characters.size,
+                key = { characters[it].id }
+            ) { index ->
+                val character = characters[index]
+                CharacterListItemComponent(
+                    dimension34cCharacter = character,
+                    onClick = { onCharacterClick(character.id) }
+                )
+            }
+        }
+    }
 }

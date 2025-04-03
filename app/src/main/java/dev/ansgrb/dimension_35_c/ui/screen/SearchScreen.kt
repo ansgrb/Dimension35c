@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -39,6 +40,7 @@ import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -73,7 +75,6 @@ fun SearchScreen(
             .fillMaxSize()
             .padding(top = 16.dp)
     ) {
-        // Enhanced Search Bar
         Card(
             modifier = Modifier
                 .fillMaxWidth()
@@ -102,44 +103,47 @@ fun SearchScreen(
                     focusedContainerColor = MaterialTheme.colorScheme.surface,
                     unfocusedContainerColor = MaterialTheme.colorScheme.surface,
                     focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent
                 ),
                 modifier = Modifier.fillMaxWidth()
             )
         }
-        // Status Filter Chips
+
         LazyRow(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 16.dp),
         ) {
             item {
-                FilterChip(
+                AllFilterChip(
                     selected = selectedStatus == null,
                     onClick = { viewModel.onStatusSelected(null) },
-                    label = { Text("All") },
-                    colors = FilterChipDefaults.filterChipColors(
-                        selectedContainerColor = MaterialTheme.colorScheme.primary,
-                        selectedLabelColor = MaterialTheme.colorScheme.onPrimary
-                    )
+                    resultCount = when (val state = searchResults) {
+                        is SearchState.Loaded -> state.dimension34cCharacters.size
+                        else -> null
+                    },
+                    showCount = searchQuery.isNotEmpty()
                 )
             }
-            items(CharacterStatus.getAllStatuses().size) { status ->
+            items(CharacterStatus.getAllStatuses().size) { index ->
+                val status = CharacterStatus.getAllStatuses()[index]
+                val statusCount = when (val state = searchResults) {
+                    is SearchState.Loaded -> state.dimension34cCharacters.count { it.status == status }
+                    else -> null
+                }
                 StatusFilterChip(
-                    status = CharacterStatus.getAllStatuses()[status],
-                    selected = selectedStatus == CharacterStatus.getAllStatuses()[status],
-                    onSelected = {
-                        viewModel.onStatusSelected(CharacterStatus.getAllStatuses()[status])
-                    }
+                    status = status,
+                    selected = selectedStatus == status,
+                    onSelected = { viewModel.onStatusSelected(status) },
+                    resultCount = statusCount,
+                    showCount = searchQuery.isNotEmpty()
                 )
             }
         }
-        // Search Results
         when (val state = searchResults) {
             SearchState.Initial -> EmptyStateCard("Start typing to search for characters")
             SearchState.Loading -> LoadingSpinnerComponent()
             is SearchState.Loaded -> SearchResultList(
                 characters = state.dimension34cCharacters,
-                searchQuery = searchQuery,
                 onCharacterClick = onCharacterClick
             )
             is SearchState.Error -> EmptyStateCard(state.message)
@@ -151,7 +155,9 @@ fun SearchScreen(
 private fun StatusFilterChip(
     status: CharacterStatus,
     selected: Boolean,
-    onSelected: () -> Unit
+    onSelected: () -> Unit,
+    resultCount: Int?,
+    showCount: Boolean
 ) {
     FilterChip(
         selected = selected,
@@ -163,7 +169,33 @@ private fun StatusFilterChip(
                     .background(status.color, CircleShape)
             )
         },
-        label = { Text(status.displayName) },
+        label = {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(status.displayName)
+                if (showCount && resultCount != null) {
+                    Surface(
+                        shape = CircleShape,
+                        color = if (selected)
+                            status.color.copy(alpha = 0.3f)
+                        else
+                            status.color.copy(alpha = 0.1f)
+                    ) {
+                        Text(
+                            text = resultCount.toString(),
+                            style = MaterialTheme.typography.labelSmall,
+                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                            color = if (selected)
+                                status.color.copy(alpha = 0.9f)
+                            else
+                                status.color
+                        )
+                    }
+                }
+            }
+        },
         colors = FilterChipDefaults.filterChipColors(
             selectedContainerColor = status.color.copy(alpha = 0.2f),
             selectedLabelColor = status.color
@@ -172,49 +204,75 @@ private fun StatusFilterChip(
 }
 
 @Composable
+private fun AllFilterChip(
+    selected: Boolean,
+    onClick: () -> Unit,
+    resultCount: Int?,
+    showCount: Boolean
+) {
+    FilterChip(
+        selected = selected,
+        onClick = onClick,
+        label = {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text("All")
+                if (showCount && resultCount != null) {
+                    Surface(
+                        shape = CircleShape,
+                        color = if (selected)
+                            MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.2f)
+                        else
+                            MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
+                    ) {
+                        Text(
+                            text = resultCount.toString(),
+                            style = MaterialTheme.typography.labelSmall,
+                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                            color = if (selected)
+                                MaterialTheme.colorScheme.onPrimary
+                            else
+                                MaterialTheme.colorScheme.primary
+                        )
+                    }
+                }
+            }
+        },
+        colors = FilterChipDefaults.filterChipColors(
+            selectedContainerColor = MaterialTheme.colorScheme.primary,
+            selectedLabelColor = MaterialTheme.colorScheme.onPrimary
+        )
+    )
+}
+
+@Composable
 private fun SearchResultList(
     characters: List<Dimension34cCharacter>,
-    searchQuery: String,
     onCharacterClick: (Int) -> Unit,
 ) {
-    if (characters.isEmpty() && searchQuery.isNotEmpty()) {
+    if (characters.isEmpty()) {
         EmptyStateCard("No results found")
         return
     }
-    Column {
-        if (searchQuery.isNotEmpty()) {
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant
-                )
-            ) {
-                Text(
-                    text = "${characters.size} result${if (characters.size != 1) "s" else ""} found",
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.padding(16.dp)
-                )
-            }
-        }
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(1),
-            contentPadding = PaddingValues(16.dp),
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-            modifier = Modifier.fillMaxSize()
-        ) {
-            items(
-                count = characters.size,
-                key = { characters[it].id }
-            ) { index ->
-                val character = characters[index]
-                CharacterListItemComponent(
-                    dimension34cCharacter = character,
-                    onClick = { onCharacterClick(character.id) }
-                )
-            }
+
+    LazyVerticalGrid(
+        columns = GridCells.Fixed(1),
+        contentPadding = PaddingValues(16.dp),
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+        modifier = Modifier.fillMaxSize()
+    ) {
+        items(
+            count = characters.size,
+            key = { characters[it].id }
+        ) { index ->
+            val character = characters[index]
+            CharacterListItemComponent(
+                dimension34cCharacter = character,
+                onClick = { onCharacterClick(character.id) }
+            )
         }
     }
 }

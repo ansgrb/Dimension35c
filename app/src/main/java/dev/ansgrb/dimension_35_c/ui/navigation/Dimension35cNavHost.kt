@@ -97,9 +97,6 @@ fun Dimension35cNavHost(
             CharacterEpisodeScreen(
                 characterId = entry.arguments?.getInt("characterId") ?: return@composable,
                 ktorClient = ktorClient,
-                onBackButtonClicked = {
-                    navController.popBackStack()
-                }
             )
         }
     }

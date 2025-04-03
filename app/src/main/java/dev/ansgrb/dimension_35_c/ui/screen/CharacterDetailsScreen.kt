@@ -101,61 +101,56 @@ private fun EnhancedCharacterContent(
     onViewEpisodesClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Box(modifier = modifier.fillMaxSize()) {
-        LazyColumn(
-            state = rememberLazyListState(),
-            contentPadding = PaddingValues(bottom = 100.dp)
-        ) {
-            item {
-                CharacterHeader(character)
-            }
-            item {
-                CharacterInfoCard(keyFigures)
-            }
-        }
-
-        FloatingActionButton(
-            onClick = onViewEpisodesClick,
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(16.dp)
-        ) {
-            Icon(
-                imageVector = Icons.Rounded.PlayArrow,
-                contentDescription = "View episodes"
-            )
-        }
-    }
-}
-
-@Composable
-private fun CharacterHeader(character: Dimension34cCharacter) {
-    Box {
-        AsyncImage(
-            model = character.imageUrl,
-            contentDescription = character.name,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(300.dp),
-            contentScale = ContentScale.Crop
-        )
-
-        Surface(
-            modifier = Modifier
-                .fillMaxWidth()
-                .align(Alignment.BottomCenter),
-            color = MaterialTheme.colorScheme.surface.copy(alpha = 0.9f)
-        ) {
-            Column(
-                modifier = Modifier.padding(16.dp)
+    LazyColumn(
+        state = rememberLazyListState(),
+        modifier = modifier.fillMaxSize(),
+        contentPadding = PaddingValues(16.dp)
+    ) {
+        item {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
             ) {
-                Text(
-                    text = character.name,
-                    style = MaterialTheme.typography.headlineMedium,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-                StatusChip(character.status)
+                Box {
+                    AsyncImage(
+                        model = character.imageUrl,
+                        contentDescription = character.name,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(350.dp),
+                        contentScale = ContentScale.Crop
+                    )
+                }
+                Column(
+                    modifier = Modifier.padding(16.dp)
+                ) {
+                    Text(
+                        text = character.name,
+                        style = MaterialTheme.typography.headlineMedium
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    StatusChip(character.status)
+                    Spacer(modifier = Modifier.height(16.dp))
+                    OutlinedButton(
+                        onClick = onViewEpisodesClick,
+                        modifier = Modifier.fillMaxWidth(),
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Rounded.PlayArrow,
+                            contentDescription = null,
+                            modifier = Modifier.padding(end = 8.dp)
+                        )
+                        Text("View Episodes")
+                    }
+                }
             }
+        }
+        item {
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+        item {
+            CharacterInfoCard(keyFigures)
         }
     }
 }
@@ -213,7 +208,6 @@ private fun StatusChip(status: CharacterStatus) {
         CharacterStatus.Dead -> Color.Red
         CharacterStatus.Unknown -> Color.Gray
     }
-
     Surface(
         color = statusColor.copy(alpha = 0.1f),
         shape = RoundedCornerShape(16.dp),

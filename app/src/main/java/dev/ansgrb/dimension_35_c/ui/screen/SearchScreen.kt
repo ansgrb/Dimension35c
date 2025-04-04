@@ -60,14 +60,14 @@ import dev.ansgrb.dimension_35_c.viewmodel.SearchState
 import dev.ansgrb.network.models.domain.Dimension34cCharacter
 import dev.ansgrb.network.models.domain.CharacterStatus
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchScreen(
     viewModel: SearchScreenViewModel = hiltViewModel(),
     onCharacterClick: (Int) -> Unit,
 ) {
     val searchQuery by viewModel.searchQuery.collectAsState()
-    val searchResults by viewModel.searchResults.collectAsState()
+    val rawSearchResults by viewModel.rawSearchResults.collectAsState()
+    val filteredSearchResults by viewModel.filteredSearchResults.collectAsState()
     val selectedStatus by viewModel.selectedStatus.collectAsState()
 
     Column(
@@ -81,14 +81,14 @@ fun SearchScreen(
         )
 
         StatusFilterChips(
-            searchResults = searchResults,
+            rawResults = rawSearchResults,
             selectedStatus = selectedStatus,
             onStatusSelected = viewModel::onStatusSelected,
             searchQuery = searchQuery
         )
 
         SearchResultsContent(
-            searchResults = searchResults,
+            searchResults = filteredSearchResults,
             onCharacterClick = onCharacterClick
         )
     }
@@ -138,7 +138,7 @@ private fun EnhancedSearchBar(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun StatusFilterChips(
-    searchResults: SearchState,
+    rawResults: SearchState,
     selectedStatus: CharacterStatus?,
     onStatusSelected: (CharacterStatus?) -> Unit,
     searchQuery: String
@@ -150,12 +150,12 @@ private fun StatusFilterChips(
         val statuses = listOf(null) + CharacterStatus.getAllStatuses()
         items(statuses.size) { index ->
             val status = statuses[index]
-            val resultCount = when (searchResults) {
+            val resultCount = when (rawResults) {
                 is SearchState.Loaded -> {
                     if (status == null) {
-                        searchResults.dimension34cCharacters.size
+                        rawResults.dimension34cCharacters.size
                     } else {
-                        searchResults.dimension34cCharacters.count { it.status == status }
+                        rawResults.dimension34cCharacters.count { it.status == status }
                     }
                 }
                 else -> null

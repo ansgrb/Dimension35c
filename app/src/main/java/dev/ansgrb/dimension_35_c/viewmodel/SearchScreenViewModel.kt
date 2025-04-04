@@ -34,7 +34,6 @@ import kotlinx.coroutines.withContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.awaitAll
 
-
 @OptIn(FlowPreview::class)
 @HiltViewModel
 class SearchScreenViewModel @Inject constructor(
@@ -46,8 +45,13 @@ class SearchScreenViewModel @Inject constructor(
     private val _selectedStatus = MutableStateFlow<CharacterStatus?>(null)
     val selectedStatus = _selectedStatus.asStateFlow()
 
-    private val _searchResults = MutableStateFlow<SearchState>(SearchState.Initial)
-    val searchResults = _searchResults.asStateFlow()
+    // store raw results (without status filter)
+    private val _rawSearchResults = MutableStateFlow<SearchState>(SearchState.Initial)
+    val rawSearchResults = _rawSearchResults.asStateFlow()
+
+    // store filtered results (with status filter)
+    private val _filteredSearchResults = MutableStateFlow<SearchState>(SearchState.Initial)
+    val filteredSearchResults = _filteredSearchResults.asStateFlow()
 
     private var searchJob: Job? = null
 
@@ -63,7 +67,8 @@ class SearchScreenViewModel @Inject constructor(
                 if (params.query.length >= 2) {
                     performSearch(params)
                 } else if (params.query.isEmpty()) {
-                    _searchResults.value = SearchState.Initial
+                    _rawSearchResults.value = SearchState.Initial
+                    _filteredSearchResults.value = SearchState.Initial
                 }
             }
             .launchIn(viewModelScope)
@@ -75,22 +80,49 @@ class SearchScreenViewModel @Inject constructor(
 
     fun onStatusSelected(status: CharacterStatus?) {
         _selectedStatus.value = status
+        applyStatusFilter()
     }
 
     private fun performSearch(params: SearchParams) {
         searchJob?.cancel()
         searchJob = viewModelScope.launch {
             try {
-                _searchResults.value = SearchState.Loading
+                _rawSearchResults.value = SearchState.Loading
+                _filteredSearchResults.value = SearchState.Loading
+
+                // always search without status filter to get all results
                 val filter = CharacterFilter(
                     name = params.query.takeIf { it.isNotEmpty() },
-                    status = params.status?.displayName
+                    status = null // IMPORTANT: don't include status in initial search
                 )
+
                 val results = fetchAllResults(filter)
-                _searchResults.value = SearchState.Loaded(results)
+                _rawSearchResults.value = SearchState.Loaded(results)
+                applyStatusFilter() // Apply current status filter to new results
             } catch (e: Exception) {
-                _searchResults.value = SearchState.Error(e.message ?: "An error occurred")
+                _rawSearchResults.value = SearchState.Error(e.message ?: "An error occurred")
+                _filteredSearchResults.value = SearchState.Error(e.message ?: "An error occurred")
             }
+        }
+    }
+
+    private fun applyStatusFilter() {
+        when (val results = _rawSearchResults.value) {
+            is SearchState.Loaded -> {
+                _filteredSearchResults.value = if (_selectedStatus.value != null) {
+                    val filteredList = results.dimension34cCharacters.filter {
+                        it.status == _selectedStatus.value
+                    }
+                    if (filteredList.isEmpty()) {
+                        SearchState.Loaded(emptyList())
+                    } else {
+                        SearchState.Loaded(filteredList)
+                    }
+                } else {
+                    results
+                }
+            }
+            else -> _filteredSearchResults.value = results
         }
     }
 

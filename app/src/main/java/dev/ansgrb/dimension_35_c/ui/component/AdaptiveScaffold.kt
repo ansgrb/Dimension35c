@@ -16,10 +16,12 @@
  */
 package dev.ansgrb.dimension_35_c.ui.component
 
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.isImeVisible
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
@@ -32,38 +34,34 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun AdaptiveScaffold(
     navController: NavHostController,
     currentRoute: String?,
     modifier: Modifier = Modifier,
-    content: @Composable (PaddingValues) -> Unit
+    content: @Composable (PaddingValues) -> Unit,
 ) {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     Scaffold(
         modifier = modifier
             .fillMaxSize()
             .navigationBarsPadding()
-            .imePadding()
             .nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             when (currentRoute) {
                 BottomNavItems.HOME.route -> Dimension35cToolbarComponent(
-                    title = "Dimension 35c-c",
+                    title = "Dimension 35-C",
                     scrollBehavior = scrollBehavior,
                 )
-
                 BottomNavItems.EPISODES.route -> Dimension35cToolbarComponent(
                     title = "Episodes",
                     scrollBehavior = scrollBehavior,
                 )
-
                 BottomNavItems.SEARCH.route -> Dimension35cToolbarComponent(
                     title = "Search",
                     scrollBehavior = scrollBehavior,
                 )
-
                 else -> {
                     if (currentRoute?.startsWith("characterDetails/") == true ||
                         currentRoute?.startsWith("characterEpisodes/") == true
@@ -80,26 +78,29 @@ fun AdaptiveScaffold(
         },
         bottomBar = {
             if (currentRoute in BottomNavItems.entries.map { it.route }) {
-                Surface(
-                    tonalElevation = 3.dp,
-                    shadowElevation = 3.dp
-                ) {
-                    Dimension35cBottomNavigationComponent(
-                        currentRoute = currentRoute,
-                        onNavigate = { destination ->
-                            if (currentRoute == destination.route) {
-                                navController.currentBackStackEntry?.savedStateHandle?.set("scrollToTop", true)
-                            } else {
-                                navController.navigate(destination.route) {
-                                    popUpTo(navController.graph.findStartDestination().id) {
-                                        saveState = true
+                // show bottom nav when keyboard is no more
+                if (currentRoute != BottomNavItems.SEARCH.route || !WindowInsets.isImeVisible) {
+                    Surface(
+                        tonalElevation = 3.dp,
+                        shadowElevation = 3.dp
+                    ) {
+                        Dimension35cBottomNavigationComponent(
+                            currentRoute = currentRoute,
+                            onNavigate = { destination ->
+                                if (currentRoute == destination.route) {
+                                    navController.currentBackStackEntry?.savedStateHandle?.set("scrollToTop", true)
+                                } else {
+                                    navController.navigate(destination.route) {
+                                        popUpTo(navController.graph.findStartDestination().id) {
+                                            saveState = true
+                                        }
+                                        launchSingleTop = true
+                                        restoreState = true
                                     }
-                                    launchSingleTop = true
-                                    restoreState = true
                                 }
                             }
-                        }
-                    )
+                        )
+                    }
                 }
             }
         },

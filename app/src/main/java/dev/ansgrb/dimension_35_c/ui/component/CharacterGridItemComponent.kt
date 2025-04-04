@@ -65,10 +65,10 @@ fun CharacterGridItemComponent(
     ) {
         Box {
             ImageComponent(imageUrl = dimension34cCharacter.imageUrl)
-            DotStatusComponent(
-                status = dimension34cCharacter.status,
-                modifier = Modifier.padding(start = 6.dp, top = 6.dp)
-            )
+//            DotStatusComponent(
+//                status = dimension34cCharacter.status,
+//                modifier = Modifier.padding(start = 6.dp, top = 6.dp)
+//            )
         }
         Text(
             text = dimension34cCharacter.name,

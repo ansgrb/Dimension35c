@@ -28,6 +28,12 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 import dev.ansgrb.network.models.domain.Dimension34cCharacter
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.awaitAll
+
 
 @OptIn(FlowPreview::class)
 @HiltViewModel
@@ -43,13 +49,22 @@ class SearchScreenViewModel @Inject constructor(
     private val _searchResults = MutableStateFlow<SearchState>(SearchState.Initial)
     val searchResults = _searchResults.asStateFlow()
 
+    private var searchJob: Job? = null
+
     init {
-        _searchQuery
-            .debounce(500L)
+        combine(
+            _searchQuery.debounce(500L),
+            _selectedStatus
+        ) { query, status ->
+            SearchParams(query, status)
+        }
             .distinctUntilChanged()
-            .filter { it.length >= 2 }
-            .onEach { query ->
-                searchWithCurrentFilters() // replace the direct search with the filtered search
+            .onEach { params ->
+                if (params.query.length >= 2) {
+                    performSearch(params)
+                } else if (params.query.isEmpty()) {
+                    _searchResults.value = SearchState.Initial
+                }
             }
             .launchIn(viewModelScope)
     }
@@ -58,49 +73,60 @@ class SearchScreenViewModel @Inject constructor(
         _searchQuery.value = query
     }
 
-    private suspend fun fetchAllResults(filter: CharacterFilter): List<Dimension34cCharacter> {
-        val allDimension34cCharacters = mutableListOf<Dimension34cCharacter>()
-
-        when (val firstPage = characterRepository.searchCharacters(filter)) {
-            is ApiOps.Made -> {
-                allDimension34cCharacters.addAll(firstPage.data.results)
-                val totalPages = firstPage.data.info.pages
-
-                for (page in 2..totalPages) {
-                    when (val nextPage = characterRepository.searchCharacters(filter.copy(page = page))) {
-                        is ApiOps.Made -> allDimension34cCharacters.addAll(nextPage.data.results)
-                        is ApiOps.Failed -> throw nextPage.exception
-                    }
-                }
-            }
-            is ApiOps.Failed -> throw firstPage.exception
-        }
-        return allDimension34cCharacters
-    }
-
     fun onStatusSelected(status: CharacterStatus?) {
         _selectedStatus.value = status
-        if (_searchQuery.value.length >= 2) {
-            searchWithCurrentFilters()
-        }
     }
 
-    private fun searchWithCurrentFilters() {
-        viewModelScope.launch {
-            _searchResults.value = SearchState.Loading
+    private fun performSearch(params: SearchParams) {
+        searchJob?.cancel()
+        searchJob = viewModelScope.launch {
             try {
+                _searchResults.value = SearchState.Loading
                 val filter = CharacterFilter(
-                    name = _searchQuery.value.takeIf { it.isNotEmpty() },
-                    status = selectedStatus.value?.displayName
+                    name = params.query.takeIf { it.isNotEmpty() },
+                    status = params.status?.displayName
                 )
-                val allCharacters = fetchAllResults(filter)
-                _searchResults.value = SearchState.Loaded(allCharacters)
+                val results = fetchAllResults(filter)
+                _searchResults.value = SearchState.Loaded(results)
             } catch (e: Exception) {
                 _searchResults.value = SearchState.Error(e.message ?: "An error occurred")
             }
         }
     }
+
+    private suspend fun fetchAllResults(filter: CharacterFilter): List<Dimension34cCharacter> {
+        return withContext(Dispatchers.IO) {
+            val allCharacters = mutableListOf<Dimension34cCharacter>()
+
+            when (val firstPage = characterRepository.searchCharacters(filter)) {
+                is ApiOps.Made -> {
+                    allCharacters.addAll(firstPage.data.results)
+
+                    val pages = (2..firstPage.data.info.pages).map { page ->
+                        async {
+                            characterRepository.searchCharacters(filter.copy(page = page))
+                        }
+                    }
+
+                    pages.awaitAll().forEach { result ->
+                        when (result) {
+                            is ApiOps.Made -> allCharacters.addAll(result.data.results)
+                            is ApiOps.Failed -> throw result.exception
+                        }
+                    }
+                }
+                is ApiOps.Failed -> throw firstPage.exception
+            }
+
+            allCharacters
+        }
+    }
 }
+
+private data class SearchParams(
+    val query: String,
+    val status: CharacterStatus?
+)
 
 sealed interface SearchState {
     object Initial : SearchState

@@ -75,85 +75,106 @@ fun SearchScreen(
             .fillMaxSize()
             .padding(top = 16.dp)
     ) {
-        Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp),
-            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-        ) {
-            TextField(
-                value = searchQuery,
-                onValueChange = viewModel::onSearchQueryChanged,
-                placeholder = {
-                    Text(
-                        text = "Search characters...",
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                },
-                leadingIcon = {
-                    Icon(
-                        Icons.Default.Search,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                },
-                singleLine = true,
-                shape = RoundedCornerShape(12.dp),
-                colors = TextFieldDefaults.colors(
-                    focusedContainerColor = MaterialTheme.colorScheme.surface,
-                    unfocusedContainerColor = MaterialTheme.colorScheme.surface,
-                    focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent
-                ),
-                modifier = Modifier.fillMaxWidth()
-            )
-        }
+        EnhancedSearchBar(
+            query = searchQuery,
+            onQueryChange = viewModel::onSearchQueryChanged
+        )
 
-        LazyRow(
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 16.dp),
-        ) {
-            item {
-                AllFilterChip(
-                    selected = selectedStatus == null,
-                    onClick = { viewModel.onStatusSelected(null) },
-                    resultCount = when (val state = searchResults) {
-                        is SearchState.Loaded -> state.dimension34cCharacters.size
-                        else -> null
-                    },
-                    showCount = searchQuery.isNotEmpty()
+        StatusFilterChips(
+            searchResults = searchResults,
+            selectedStatus = selectedStatus,
+            onStatusSelected = viewModel::onStatusSelected,
+            searchQuery = searchQuery
+        )
+
+        SearchResultsContent(
+            searchResults = searchResults,
+            onCharacterClick = onCharacterClick
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun EnhancedSearchBar(
+    query: String,
+    onQueryChange: (String) -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+    ) {
+        TextField(
+            value = query,
+            onValueChange = onQueryChange,
+            placeholder = {
+                Text(
+                    text = "Search characters...",
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-            }
-            items(CharacterStatus.getAllStatuses().size) { index ->
-                val status = CharacterStatus.getAllStatuses()[index]
-                val statusCount = when (val state = searchResults) {
-                    is SearchState.Loaded -> state.dimension34cCharacters.count { it.status == status }
-                    else -> null
+            },
+            leadingIcon = {
+                Icon(
+                    Icons.Default.Search,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            },
+            singleLine = true,
+            shape = RoundedCornerShape(12.dp),
+            colors = TextFieldDefaults.colors(
+                focusedContainerColor = MaterialTheme.colorScheme.surface,
+                unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                focusedIndicatorColor = Color.Transparent,
+                unfocusedIndicatorColor = Color.Transparent
+            ),
+            modifier = Modifier.fillMaxWidth()
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun StatusFilterChips(
+    searchResults: SearchState,
+    selectedStatus: CharacterStatus?,
+    onStatusSelected: (CharacterStatus?) -> Unit,
+    searchQuery: String
+) {
+    LazyRow(
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 16.dp),
+    ) {
+        val statuses = listOf(null) + CharacterStatus.getAllStatuses()
+        items(statuses.size) { index ->
+            val status = statuses[index]
+            val resultCount = when (searchResults) {
+                is SearchState.Loaded -> {
+                    if (status == null) {
+                        searchResults.dimension34cCharacters.size
+                    } else {
+                        searchResults.dimension34cCharacters.count { it.status == status }
+                    }
                 }
-                StatusFilterChip(
-                    status = status,
-                    selected = selectedStatus == status,
-                    onSelected = { viewModel.onStatusSelected(status) },
-                    resultCount = statusCount,
-                    showCount = searchQuery.isNotEmpty()
-                )
+                else -> null
             }
-        }
-        when (val state = searchResults) {
-            SearchState.Initial -> EmptyStateCard("Start typing to search for characters")
-            SearchState.Loading -> LoadingSpinnerComponent()
-            is SearchState.Loaded -> SearchResultList(
-                characters = state.dimension34cCharacters,
-                onCharacterClick = onCharacterClick
+            FilterChipComponent(
+                status = status,
+                selected = selectedStatus == status,
+                onSelected = { onStatusSelected(status) },
+                resultCount = resultCount,
+                showCount = searchQuery.isNotEmpty()
             )
-            is SearchState.Error -> EmptyStateCard(state.message)
         }
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun StatusFilterChip(
-    status: CharacterStatus,
+private fun FilterChipComponent(
+    status: CharacterStatus?,
     selected: Boolean,
     onSelected: () -> Unit,
     resultCount: Int?,
@@ -162,89 +183,79 @@ private fun StatusFilterChip(
     FilterChip(
         selected = selected,
         onClick = onSelected,
-        leadingIcon = {
-            Box(
-                modifier = Modifier
-                    .size(8.dp)
-                    .background(status.color, CircleShape)
-            )
+        leadingIcon = status?.let {
+            {
+                Box(
+                    modifier = Modifier
+                        .size(8.dp)
+                        .background(it.color, CircleShape)
+                )
+            }
         },
         label = {
             Row(
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(status.displayName)
+                Text(status?.displayName ?: "All")
                 if (showCount && resultCount != null) {
                     Surface(
                         shape = CircleShape,
-                        color = if (selected)
-                            status.color.copy(alpha = 0.3f)
-                        else
-                            status.color.copy(alpha = 0.1f)
+                        color = when {
+                            selected && status != null -> status.color.copy(alpha = 0.3f)
+                            selected -> MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
+                            status != null -> status.color.copy(alpha = 0.1f)
+                            else -> MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
+                        }
                     ) {
                         Text(
                             text = resultCount.toString(),
                             style = MaterialTheme.typography.labelSmall,
                             modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
-                            color = if (selected)
-                                status.color.copy(alpha = 0.9f)
-                            else
-                                status.color
+                            color = when {
+                                selected && status != null -> status.color
+                                selected -> MaterialTheme.colorScheme.onPrimary
+                                status != null -> status.color
+                                else -> MaterialTheme.colorScheme.primary
+                            }
                         )
                     }
                 }
             }
         },
         colors = FilterChipDefaults.filterChipColors(
-            selectedContainerColor = status.color.copy(alpha = 0.2f),
-            selectedLabelColor = status.color
+            selectedContainerColor = status?.let { it.color.copy(alpha = 0.2f) }
+                ?: MaterialTheme.colorScheme.primary,
+            selectedLabelColor = status?.color ?: MaterialTheme.colorScheme.onPrimary
         )
     )
 }
 
 @Composable
-private fun AllFilterChip(
-    selected: Boolean,
-    onClick: () -> Unit,
-    resultCount: Int?,
-    showCount: Boolean
+private fun SearchResultsContent(
+    searchResults: SearchState,
+    onCharacterClick: (Int) -> Unit
 ) {
-    FilterChip(
-        selected = selected,
-        onClick = onClick,
-        label = {
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(4.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text("All")
-                if (showCount && resultCount != null) {
-                    Surface(
-                        shape = CircleShape,
-                        color = if (selected)
-                            MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.2f)
-                        else
-                            MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
-                    ) {
-                        Text(
-                            text = resultCount.toString(),
-                            style = MaterialTheme.typography.labelSmall,
-                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
-                            color = if (selected)
-                                MaterialTheme.colorScheme.onPrimary
-                            else
-                                MaterialTheme.colorScheme.primary
-                        )
-                    }
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.TopCenter
+    ) {
+        when (searchResults) {
+            SearchState.Initial -> EmptyStateCard("Start typing to search for characters")
+            SearchState.Loading -> LoadingSpinnerComponent()
+            is SearchState.Loaded -> {
+                if (searchResults.dimension34cCharacters.isEmpty()) {
+                    EmptyStateCard("No results found")
+                } else {
+                    SearchResultList(
+                        characters = searchResults.dimension34cCharacters,
+                        onCharacterClick = onCharacterClick
+                    )
                 }
             }
-        },
-        colors = FilterChipDefaults.filterChipColors(
-            selectedContainerColor = MaterialTheme.colorScheme.primary,
-            selectedLabelColor = MaterialTheme.colorScheme.onPrimary
-        )
-    )
+            is SearchState.Error -> EmptyStateCard(searchResults.message)
+        }
+    }
 }
 
 @Composable
@@ -252,11 +263,6 @@ private fun SearchResultList(
     characters: List<Dimension34cCharacter>,
     onCharacterClick: (Int) -> Unit,
 ) {
-    if (characters.isEmpty()) {
-        EmptyStateCard("No results found")
-        return
-    }
-
     LazyVerticalGrid(
         columns = GridCells.Fixed(1),
         contentPadding = PaddingValues(16.dp),

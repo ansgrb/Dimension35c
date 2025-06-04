@@ -19,7 +19,7 @@ package dev.ansgrb.dimension_35_c.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dev.ansgrb.dimension_35_c.data.repository.EpisodesRepository
+import dev.ansgrb.dimension_35_c.data.repository.IEpisodesRepository
 import dev.ansgrb.network.models.domain.Episode
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -29,7 +29,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ForAllEpisodesScreenViewModel @Inject constructor(
-    private val episodesRepository: EpisodesRepository
+    private val episodesRepository: IEpisodesRepository
 ): ViewModel() {
     private val _viewState = MutableStateFlow<ForAllEpisodesScreenViewState>(ForAllEpisodesScreenViewState.Loading)
     val viewState = _viewState.asStateFlow()

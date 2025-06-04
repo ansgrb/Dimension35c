@@ -24,20 +24,20 @@ import dev.ansgrb.network.models.domain.CharacterPage
 import dev.ansgrb.network.models.domain.Episode
 import javax.inject.Inject
 
-class CharacterRepository @Inject constructor(private val ktorClient: KtorClient) {
-    suspend fun fetchCharacters(page: Int): ApiOps<CharacterPage> {
+class CharacterRepository @Inject constructor(private val ktorClient: KtorClient) : ICharacterRepository {
+    override suspend fun fetchCharacters(page: Int): ApiOps<CharacterPage> {
         return ktorClient.getCharacterByPage(pageNo = page)
     }
 
-    suspend fun fetchCharacter(characterId: Int): ApiOps<Dimension34cCharacter> {
+    override suspend fun fetchCharacter(characterId: Int): ApiOps<Dimension34cCharacter> {
         return ktorClient.getCharacter(characterId)
     }
 
-    suspend fun fetchEpisodes(episodeIds: List<Int>): ApiOps<List<Episode>> {
+    override suspend fun fetchEpisodes(episodeIds: List<Int>): ApiOps<List<Episode>> {
         return ktorClient.getEpisodes(episodeIds)
     }
 
-    suspend fun searchCharacters(filter: CharacterFilter): ApiOps<CharacterPage> {
+    override suspend fun searchCharacters(filter: CharacterFilter): ApiOps<CharacterPage> {
         return ktorClient.searchCharacters(filter)
     }
 }

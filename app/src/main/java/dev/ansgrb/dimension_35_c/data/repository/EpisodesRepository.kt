@@ -22,6 +22,6 @@ import dev.ansgrb.network.models.domain.Episode
 import javax.inject.Inject
 
 
-class EpisodesRepository @Inject constructor(private val ktorClient: KtorClient) {
-    suspend fun forAllEpisodesFetch(): ApiOps<List<Episode>> = ktorClient.getAllEpisodes()
+class EpisodesRepository @Inject constructor(private val ktorClient: KtorClient) : IEpisodesRepository {
+    override suspend fun forAllEpisodesFetch(): ApiOps<List<Episode>> = ktorClient.getAllEpisodes()
 }

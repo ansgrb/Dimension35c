@@ -19,7 +19,7 @@ package dev.ansgrb.dimension_35_c.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dev.ansgrb.dimension_35_c.data.repository.CharacterRepository
+import dev.ansgrb.dimension_35_c.data.repository.ICharacterRepository
 import dev.ansgrb.network.models.domain.Dimension34cCharacter
 import dev.ansgrb.network.models.domain.Episode
 import kotlinx.coroutines.flow.MutableStateFlow

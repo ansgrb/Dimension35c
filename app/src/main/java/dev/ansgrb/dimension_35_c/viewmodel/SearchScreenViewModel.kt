@@ -19,7 +19,7 @@ package dev.ansgrb.dimension_35_c.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dev.ansgrb.dimension_35_c.data.repository.CharacterRepository
+import dev.ansgrb.dimension_35_c.data.repository.ICharacterRepository
 import dev.ansgrb.network.ApiOps
 import dev.ansgrb.network.models.domain.CharacterFilter
 import dev.ansgrb.network.models.domain.CharacterStatus
@@ -37,7 +37,7 @@ import kotlinx.coroutines.awaitAll
 @OptIn(FlowPreview::class)
 @HiltViewModel
 class SearchScreenViewModel @Inject constructor(
-    private val characterRepository: CharacterRepository
+    private val characterRepository: ICharacterRepository
 ) : ViewModel() {
     private val _searchQuery = MutableStateFlow("")
     val searchQuery = _searchQuery.asStateFlow()

@@ -19,7 +19,12 @@ package dev.ansgrb.dimension_35_c.di
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.Binds
 import dagger.hilt.components.SingletonComponent
+import dev.ansgrb.dimension_35_c.data.repository.CharacterRepository
+import dev.ansgrb.dimension_35_c.data.repository.EpisodesRepository
+import dev.ansgrb.dimension_35_c.data.repository.ICharacterRepository
+import dev.ansgrb.dimension_35_c.data.repository.IEpisodesRepository
 import dev.ansgrb.network.KtorClient
 import javax.inject.Singleton
 
@@ -32,4 +37,21 @@ class NetworkModule {
     fun provideKtorClient(): KtorClient {
         return KtorClient()
     }
+}
+
+@Module
+@InstallIn(SingletonComponent::class)
+abstract class RepositoryModule {
+
+    @Binds
+    @Singleton
+    abstract fun bindCharacterRepository(
+        characterRepository: CharacterRepository
+    ): ICharacterRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindEpisodesRepository(
+        episodesRepository: EpisodesRepository
+    ): IEpisodesRepository
 }

@@ -31,8 +31,10 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import dev.ansgrb.dimension_35_c.ui.component.CharacterGridItemComponent
 import dev.ansgrb.dimension_35_c.ui.component.LoadingSpinnerComponent
@@ -72,6 +74,23 @@ fun MainScreen(
         }
     }
 
+    // Pagination trigger
+    LaunchedEffect(gridState, viewState) { // React to scroll changes and viewState
+        snapshotFlow { gridState.layoutInfo }
+            .collect { layoutInfo ->
+                val lastVisibleItemIndex = layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
+                val totalItemsCount = layoutInfo.totalItemsCount
+
+                // Check if we are close to the end and need to load more
+                // And also ensure we are in a state where loading more is appropriate
+                if (viewState is MainViewState.GridLoaded && !(viewState as MainViewState.GridLoaded).isLoadingMore && (viewState as MainViewState.GridLoaded).hasMorePages) {
+                    if (totalItemsCount > 0 && lastVisibleItemIndex >= totalItemsCount - 5) { // Threshold of 5 items
+                        viewModel.loadNextPage()
+                    }
+                }
+            }
+    }
+
     when (val state = viewState) {
         is MainViewState.Loading -> {
             LoadingSpinnerComponent()
@@ -98,13 +117,6 @@ fun MainScreen(
                     if (state.isLoadingMore) {
                         item(span = { GridItemSpan(2) }) {
                             LoadingSpinnerComponent()
-                        }
-                    }
-                    if (!state.isLoadingMore && state.hasMorePages) {
-                        item(span = { GridItemSpan(2) }) {
-                            LaunchedEffect(Unit) {
-                                viewModel.loadNextPage()
-                            }
                         }
                     }
                 }

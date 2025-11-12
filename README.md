@@ -67,6 +67,19 @@ This modular approach enforces separation of concerns, improves build times, and
     - **State Management**: [ViewModels](https://developer.android.com/topic/libraries/architecture/viewmodel) are used to manage UI state. They fetch data from the repositories and expose it to the UI using Kotlin's `StateFlow`.
     - **Dependency Injection**: [Hilt](https://developer.android.com/training/dependency-injection/hilt-android) is used to manage dependencies throughout the application, making the code more modular and testable.
 
+## Screenshots
+
+| Light Theme | Dark Theme |
+| :---: | :---: |
+| **Home Page** | **Home Page** |
+| ![Light](assets/screenshots/dimention35c_home_page_light.png) | ![Dark](assets/screenshots/dimention35c_home_page_dark.png) |
+| **Details Page** | **Details Page** |
+| ![Light](assets/screenshots/dimention35c_charachter_details_page_light.png) | ![Dark](assets/screenshots/dimention35c_charachter_details_page_dark.png) |
+| **Search Page** | **Search Page** |
+| ![Light](assets/screenshots/dimention35c_search_page_light.png) | ![Dark](assets/screenshots/dimention35c_search_page_dark.png) |
+| **Episodes Page** | **Episodes Page** |
+| ![Light](assets/screenshots/dimention35c_episodes_page_light.png) | ![Dark](assets/screenshots/dimention35c_episodes_page_dark.png) |
+
 ## How to Build
 
 To build and run the project, you will need Android Studio.
